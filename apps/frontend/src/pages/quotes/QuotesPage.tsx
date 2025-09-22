@@ -4,16 +4,18 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
+import { QuoteModal } from '@/components/QuoteModal'
+import { QuoteViewModal } from '@/components/QuoteViewModal'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface Quote {
   id: string
   number: string
-  customerName: string
-  customerEmail: string
+  client: string
   description: string
-  totalValue: number
-  status: 'draft' | 'sent' | 'approved' | 'rejected' | 'expired'
+  value: number
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
   validUntil: string
   createdAt: string
 }
@@ -23,6 +25,15 @@ export function QuotesPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
+  
+  // Estados para controlar os modais
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
+  const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     // Simular carregamento de orçamentos
@@ -33,21 +44,19 @@ export function QuotesPage() {
         {
           id: '1',
           number: 'ORC-2024-001',
-          customerName: 'João Silva',
-          customerEmail: 'joao@email.com',
-          description: 'Orçamento para produtos personalizados',
-          totalValue: 2500.00,
-          status: 'sent',
+          client: 'João Silva',
+          description: 'Orçamento para produtos personalizados de alta qualidade',
+          value: 2500.00,
+          status: 'pending',
           validUntil: '2024-02-15',
           createdAt: '2024-01-15'
         },
         {
           id: '2',
           number: 'ORC-2024-002',
-          customerName: 'Maria Santos',
-          customerEmail: 'maria@email.com',
-          description: 'Orçamento para linha premium',
-          totalValue: 4200.00,
+          client: 'Maria Santos',
+          description: 'Orçamento para linha premium com acabamento especial',
+          value: 4200.00,
           status: 'approved',
           validUntil: '2024-02-20',
           createdAt: '2024-01-18'
@@ -55,11 +64,10 @@ export function QuotesPage() {
         {
           id: '3',
           number: 'ORC-2024-003',
-          customerName: 'Pedro Costa',
-          customerEmail: 'pedro@email.com',
-          description: 'Orçamento para revenda',
-          totalValue: 1800.00,
-          status: 'draft',
+          client: 'Pedro Costa',
+          description: 'Orçamento para revenda com desconto por volume',
+          value: 1800.00,
+          status: 'pending',
           validUntil: '2024-02-25',
           createdAt: '2024-01-20'
         }
@@ -74,7 +82,7 @@ export function QuotesPage() {
 
   const filteredQuotes = quotes.filter(quote => {
     const matchesSearch = quote.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         quote.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          quote.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = selectedStatus === 'all' || quote.status === selectedStatus
     return matchesSearch && matchesStatus
@@ -82,8 +90,7 @@ export function QuotesPage() {
 
   const statusOptions = [
     { value: 'all', label: 'Todos os Status' },
-    { value: 'draft', label: 'Rascunho' },
-    { value: 'sent', label: 'Enviado' },
+    { value: 'pending', label: 'Pendente' },
     { value: 'approved', label: 'Aprovado' },
     { value: 'rejected', label: 'Rejeitado' },
     { value: 'expired', label: 'Expirado' }
@@ -91,19 +98,17 @@ export function QuotesPage() {
 
   const getStatusColor = (status: Quote['status']) => {
     const colors = {
-      draft: 'bg-gray-100 text-gray-800',
-      sent: 'bg-blue-100 text-blue-800',
+      pending: 'bg-yellow-100 text-yellow-800',
       approved: 'bg-green-100 text-green-800',
       rejected: 'bg-red-100 text-red-800',
-      expired: 'bg-orange-100 text-orange-800'
+      expired: 'bg-gray-100 text-gray-800'
     }
     return colors[status]
   }
 
   const getStatusLabel = (status: Quote['status']) => {
     const labels = {
-      draft: 'Rascunho',
-      sent: 'Enviado',
+      pending: 'Pendente',
       approved: 'Aprovado',
       rejected: 'Rejeitado',
       expired: 'Expirado'
@@ -111,16 +116,94 @@ export function QuotesPage() {
     return labels[status]
   }
 
+  // Handlers para gerenciar os modais
+  const handleNewQuote = () => {
+    setModalMode('create')
+    setSelectedQuote(null)
+    setIsQuoteModalOpen(true)
+  }
+
   const handleView = (quoteId: string) => {
-    toast.info(`Visualizar orçamento ${quoteId}`)
+    const quote = quotes.find(q => q.id === quoteId)
+    if (quote) {
+      setSelectedQuote(quote)
+      setIsViewModalOpen(true)
+    }
   }
 
   const handleEdit = (quoteId: string) => {
-    toast.info(`Editar orçamento ${quoteId}`)
+    const quote = quotes.find(q => q.id === quoteId)
+    if (quote) {
+      setModalMode('edit')
+      setSelectedQuote(quote)
+      setIsQuoteModalOpen(true)
+    }
   }
 
   const handleDelete = (quoteId: string) => {
-    toast.info(`Excluir orçamento ${quoteId}`)
+    const quote = quotes.find(q => q.id === quoteId)
+    if (quote) {
+      setQuoteToDelete(quote)
+      setIsConfirmDialogOpen(true)
+    }
+  }
+
+  const handleSaveQuote = async (quoteData: Omit<Quote, 'id' | 'createdAt' | 'number'>) => {
+    setActionLoading(true)
+    
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (modalMode === 'create') {
+        const newQuote: Quote = {
+          ...quoteData,
+          id: Date.now().toString(),
+          number: `ORC-2024-${String(quotes.length + 1).padStart(3, '0')}`,
+          createdAt: new Date().toISOString().split('T')[0]
+        }
+        setQuotes(prev => [...prev, newQuote])
+        toast.success('Orçamento criado com sucesso!')
+      } else {
+        setQuotes(prev => prev.map(quote => 
+          quote.id === selectedQuote?.id 
+            ? { ...quote, ...quoteData }
+            : quote
+        ))
+        toast.success('Orçamento atualizado com sucesso!')
+      }
+    } catch {
+      toast.error('Erro ao salvar orçamento')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!quoteToDelete) return
+    
+    setActionLoading(true)
+    
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setQuotes(prev => prev.filter(quote => quote.id !== quoteToDelete.id))
+      toast.success('Orçamento excluído com sucesso!')
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao excluir orçamento')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCloseModals = () => {
+    setIsQuoteModalOpen(false)
+    setIsViewModalOpen(false)
+    setIsConfirmDialogOpen(false)
+    setSelectedQuote(null)
+    setQuoteToDelete(null)
   }
 
   const formatCurrency = (value: number) => {
@@ -151,7 +234,7 @@ export function QuotesPage() {
           <p className="text-gray-600">Gerencie seus orçamentos e propostas</p>
         </div>
         
-        <Button>
+        <Button onClick={handleNewQuote}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Orçamento
         </Button>
@@ -216,22 +299,22 @@ export function QuotesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-600">Cliente: </span>
-                        <span className="font-medium">{quote.customerName}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Email: </span>
-                        <span className="font-medium">{quote.customerEmail}</span>
+                        <span className="font-medium">{quote.client}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Valor Total: </span>
                         <span className="font-bold text-primary text-lg">
-                          {formatCurrency(quote.totalValue)}
+                          {formatCurrency(quote.value)}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <span className="text-gray-600">Válido até: </span>
                         <span className="font-medium">{formatDate(quote.validUntil)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Criado em: </span>
+                        <span className="font-medium">{formatDate(quote.createdAt)}</span>
                       </div>
                     </div>
                     
@@ -270,6 +353,32 @@ export function QuotesPage() {
           ))}
         </div>
       )}
+      
+      {/* Modais */}
+      <QuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveQuote}
+        quote={selectedQuote}
+        mode={modalMode}
+      />
+      
+      <QuoteViewModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseModals}
+        quote={selectedQuote}
+      />
+      
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Orçamento"
+        description={`Tem certeza que deseja excluir o orçamento ${quoteToDelete?.number}? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

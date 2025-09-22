@@ -42,8 +42,9 @@ export function LoginPage() {
     try {
       await login(data.email, data.password)
       toast.success('Login realizado com sucesso!')
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erro ao fazer login')
+    } catch (error: unknown) {
+      const errorWithResponse = error as { response?: { data?: { message?: string } } }
+      toast.error(errorWithResponse.response?.data?.message || 'Erro ao fazer login')
     }
   }
 

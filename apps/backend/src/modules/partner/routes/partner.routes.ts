@@ -8,6 +8,7 @@ import {
   updatePartnerSchema,
   partnerFiltersSchema
 } from '../dtos';
+import { PartnerType } from '@prisma/client';
 import { PartnerService } from '../services';
 import { authMiddleware } from '../../../shared/middlewares/auth';
 import { tenantMiddleware } from '../../../shared/middlewares/tenant';
@@ -235,7 +236,7 @@ export async function partnerRoutes(fastify: FastifyInstance) {
       try {
         const { userId, companyId } = request.user;
         const filters = { ...request.query, type: request.params.type };
-        const result = await partnerService.findByType(request.params.type as any, filters, userId, companyId);
+        const result = await partnerService.findByType(request.params.type as PartnerType, filters, userId, companyId);
         
         return reply.send({
           success: true,
@@ -354,7 +355,7 @@ export async function partnerRoutes(fastify: FastifyInstance) {
           });
         }
         
-        const partner = await partnerService.updateStatus(request.params.id, status as any, userId, companyId);
+        const partner = await partnerService.updateStatus(request.params.id, status as string, userId, companyId);
         
         return reply.send({
           success: true,

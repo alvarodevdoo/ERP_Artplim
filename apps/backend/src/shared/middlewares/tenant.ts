@@ -53,7 +53,7 @@ export function addTenantFilter(companyId: string | undefined) {
 }
 
 // Helper function for multi-tenant create operations
-export function addTenantData(companyId: string | undefined, data: any) {
+export function addTenantData(companyId: string | undefined, data: Record<string, unknown>) {
   if (!companyId) {
     throw new Error('Company ID is required for tenant data');
   }

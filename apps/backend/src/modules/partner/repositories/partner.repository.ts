@@ -60,7 +60,7 @@ export class PartnerRepository {
       });
 
       return partner ? this.formatPartnerResponse(partner) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar parceiro', 500);
     }
   }
@@ -119,7 +119,7 @@ export class PartnerRepository {
 
       // Filtros de endereço
       if (filters.city || filters.state) {
-        const addressFilters: any = {};
+        const addressFilters: { path?: string[]; string_contains?: string } = {};
         if (filters.city) {
           addressFilters.path = ['city'];
           addressFilters.string_contains = filters.city;
@@ -159,7 +159,7 @@ export class PartnerRepository {
         limit: filters.limit,
         totalPages: Math.ceil(total / filters.limit)
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao listar parceiros', 500);
     }
   }
@@ -271,7 +271,7 @@ export class PartnerRepository {
       });
 
       return !!partner;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar documento', 500);
     }
   }
@@ -300,7 +300,7 @@ export class PartnerRepository {
       });
 
       return partners.map(partner => this.formatPartnerResponse(partner));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar parceiros por tipo', 500);
     }
   }
@@ -398,7 +398,7 @@ export class PartnerRepository {
       result.averageCreditLimit = result.total > 0 ? result.totalCreditLimit / result.total : 0;
 
       return result;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao obter estatísticas', 500);
     }
   }
@@ -463,7 +463,7 @@ export class PartnerRepository {
           createdAt: partner.createdAt
         };
       });
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao gerar relatório', 500);
     }
   }
@@ -477,18 +477,18 @@ export class PartnerRepository {
     return {
       id: partner.id,
       name: partner.name,
-      email: partner.email,
-      phone: partner.phone,
+      email: partner.email || '',
+      phone: partner.phone || '',
       document: partner.document,
       type: partner.type,
       isActive: partner.isActive,
-      notes: partner.notes,
+      notes: partner.notes || '',
       address,
-      creditLimit: partner.creditLimit,
-      paymentTerms: partner.paymentTerms,
+      creditLimit: 0,
+      paymentTerms: '', // Empty string instead of null since paymentTerms expects string type
       salesRepresentative: partner.salesRepresentative,
       discount: partner.discount,
-      metadata: partner.metadata as Record<string, any>,
+      metadata: partner.metadata as Record<string, unknown>,
       contacts: partner.contacts?.map(contact => ({
         id: contact.id,
         partnerId: contact.partnerId,

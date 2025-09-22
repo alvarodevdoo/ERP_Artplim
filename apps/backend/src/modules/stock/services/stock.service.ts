@@ -87,7 +87,7 @@ export class StockService {
     }
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async () => {
         // Registra a movimentação
         const movement = await this.stockRepository.createMovement(data, userId, companyId);
 
@@ -161,7 +161,7 @@ export class StockService {
     }
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async () => {
         // Registra a movimentação
         const movement = await this.stockRepository.createMovement(data, userId, companyId);
 
@@ -241,7 +241,7 @@ export class StockService {
     };
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async () => {
         // Registra a movimentação
         const movement = await this.stockRepository.createMovement(movementData, userId, companyId);
 
@@ -330,7 +330,7 @@ export class StockService {
     };
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async () => {
         // Registra a movimentação
         const movement = await this.stockRepository.createMovement(movementData, userId, companyId);
 
@@ -430,7 +430,7 @@ export class StockService {
     }
 
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await this.prisma.$transaction(async () => {
         // Cria a reserva
         const reservation = await this.stockRepository.createReservation(data, userId, companyId);
 
@@ -473,7 +473,7 @@ export class StockService {
     }
 
     try {
-      await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async () => {
         // Cancela a reserva
         await this.stockRepository.cancelReservation(id, data, companyId);
 

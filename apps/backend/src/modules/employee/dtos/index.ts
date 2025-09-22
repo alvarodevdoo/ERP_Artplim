@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { validateCPF } from '../../../shared/utils/validators';
 
 // ========== EMPLOYEE DTOs ==========
 

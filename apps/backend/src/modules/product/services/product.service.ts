@@ -5,7 +5,8 @@ import {
   ProductFiltersDto,
   ProductResponseDto,
   ProductListResponseDto,
-  ProductStatsDto
+  ProductStatsDto,
+  ProductCategoryResponseDto
 } from '../dtos';
 import {
   ProductRepository,
@@ -390,8 +391,8 @@ export class ProductService {
    */
   private async validateProductData(
     data: CreateProductDto | UpdateProductDto,
-    companyId: string,
-    excludeId?: string
+    _companyId: string,
+    _excludeId?: string
   ): Promise<void> {
     // Validar SKU
     if (data.sku) {
@@ -517,7 +518,7 @@ export class ProductService {
       }
 
       return { canDelete: true };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar se produto pode ser deletado', 500);
     }
   }
@@ -527,10 +528,10 @@ export class ProductService {
    * TODO: Implementar validação de permissões quando RoleService estiver disponível
    */
   private async validatePermission(
-    userId: string,
-    companyId: string,
-    resource: string,
-    action: string
+    _userId: string,
+    _companyId: string,
+    _resource: string,
+    _action: string
   ): Promise<void> {
     // TODO: Implementar validação de permissões
     // const hasPermission = await this.roleService.checkPermission(
@@ -548,7 +549,7 @@ export class ProductService {
   /**
    * Formatar resposta do produto
    */
-  private formatProductResponse(product: any): ProductResponseDto {
+  private formatProductResponse(product: Product & { category?: ProductCategoryResponseDto }): ProductResponseDto {
     return {
       id: product.id,
       name: product.name,

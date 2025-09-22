@@ -198,7 +198,7 @@ export class CompanyRepository {
    */
   async update(id: string, data: UpdateCompanyDto): Promise<Company> {
     try {
-      const updateData: any = {
+      const updateData: Prisma.CompanyUpdateInput = {
         ...(data.name && { name: data.name }),
         ...(data.email && { email: data.email }),
         ...(data.phone && { phone: data.phone }),

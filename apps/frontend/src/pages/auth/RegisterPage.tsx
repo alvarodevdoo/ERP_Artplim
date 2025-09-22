@@ -45,11 +45,11 @@ export function RegisterPage() {
         email: data.email,
         password: data.password,
         companyName: data.companyName,
-        phone: data.phone,
       })
       toast.success('Conta criada com sucesso!')
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erro ao criar conta')
+    } catch (error: unknown) {
+      const errorWithResponse = error as { response?: { data?: { message?: string } } }
+      toast.error(errorWithResponse.response?.data?.message || 'Erro ao criar conta')
     }
   }
 

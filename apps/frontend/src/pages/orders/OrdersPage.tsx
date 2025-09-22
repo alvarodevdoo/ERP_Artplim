@@ -4,7 +4,10 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
+import { OrderModal } from '@/components/OrderModal'
+import { OrderViewModal } from '@/components/OrderViewModal'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface Order {
   id: string
@@ -26,6 +29,15 @@ export function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedPriority, setSelectedPriority] = useState('all')
+  
+  // Estados para modais
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     // Simular carregamento de ordens de serviço
@@ -149,16 +161,101 @@ export function OrdersPage() {
     return labels[priority]
   }
 
+  // Handlers para modais
+  const handleNewOrder = () => {
+    setModalMode('create')
+    setSelectedOrder(null)
+    setIsOrderModalOpen(true)
+  }
+
   const handleView = (orderId: string) => {
-    toast.info(`Visualizar OS ${orderId}`)
+    const order = orders.find(o => o.id === orderId)
+    if (order) {
+      setSelectedOrder(order)
+      setIsViewModalOpen(true)
+    }
   }
 
   const handleEdit = (orderId: string) => {
-    toast.info(`Editar OS ${orderId}`)
+    const order = orders.find(o => o.id === orderId)
+    if (order) {
+      setModalMode('edit')
+      setSelectedOrder(order)
+      setIsOrderModalOpen(true)
+    }
   }
 
   const handleDelete = (orderId: string) => {
-    toast.info(`Excluir OS ${orderId}`)
+    const order = orders.find(o => o.id === orderId)
+    if (order) {
+      setOrderToDelete(order)
+      setIsConfirmDialogOpen(true)
+    }
+  }
+
+  const handleSaveOrder = async (orderData: Partial<Order>) => {
+    setActionLoading(true)
+    
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (modalMode === 'create') {
+        // Criar nova OS
+        const newOrder: Order = {
+          id: Date.now().toString(),
+          number: `OS-2024-${String(orders.length + 1).padStart(3, '0')}`,
+          status: 'pending',
+          createdAt: new Date().toISOString().split('T')[0],
+          ...orderData
+        } as Order
+        
+        setOrders(prev => [newOrder, ...prev])
+        toast.success('Ordem de serviço criada com sucesso!')
+      } else {
+        // Editar OS existente
+        setOrders(prev => prev.map(order => 
+          order.id === selectedOrder?.id 
+            ? { ...order, ...orderData }
+            : order
+        ))
+        toast.success('Ordem de serviço atualizada com sucesso!')
+      }
+      
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao salvar ordem de serviço')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!orderToDelete) return
+    
+    setActionLoading(true)
+    
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setOrders(prev => prev.filter(order => order.id !== orderToDelete.id))
+      toast.success('Ordem de serviço excluída com sucesso!')
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao excluir ordem de serviço')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCloseModals = () => {
+    setIsOrderModalOpen(false)
+    setIsViewModalOpen(false)
+    setIsConfirmDialogOpen(false)
+    setSelectedOrder(null)
+    setOrderToDelete(null)
+    setActionLoading(false)
   }
 
   const formatCurrency = (value: number) => {
@@ -189,7 +286,7 @@ export function OrdersPage() {
           <p className="text-gray-600">Gerencie suas ordens de serviço e atendimentos</p>
         </div>
         
-        <Button>
+        <Button onClick={handleNewOrder}>
           <Plus className="mr-2 h-4 w-4" />
           Nova OS
         </Button>
@@ -334,6 +431,32 @@ export function OrdersPage() {
           ))}
         </div>
       )}
+      
+      {/* Modais */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveOrder}
+        order={selectedOrder}
+        mode={modalMode}
+      />
+      
+      <OrderViewModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseModals}
+        order={selectedOrder}
+      />
+      
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Ordem de Serviço"
+        description={`Tem certeza que deseja excluir a ordem de serviço ${orderToDelete?.number}? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

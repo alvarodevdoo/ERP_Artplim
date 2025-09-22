@@ -78,7 +78,7 @@ export class QuoteRepository {
       });
 
       return this.mapToResponseDTO(quote);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao criar orçamento', 500);
     }
   }
@@ -120,7 +120,7 @@ export class QuoteRepository {
       });
 
       return quote ? this.mapToResponseDTO(quote) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar orçamento', 500);
     }
   }
@@ -152,7 +152,7 @@ export class QuoteRepository {
         sortOrder
       } = filters;
 
-      const where: any = {
+      const where: Record<string, unknown> = {
         companyId,
         deletedAt: null
       };
@@ -237,7 +237,7 @@ export class QuoteRepository {
           totalPages: Math.ceil(total / limit)
         }
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao listar orçamentos', 500);
     }
   }
@@ -305,7 +305,7 @@ export class QuoteRepository {
       });
 
       return this.mapToResponseDTO(quote);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao atualizar orçamento', 500);
     }
   }
@@ -325,7 +325,7 @@ export class QuoteRepository {
           deletedAt: new Date()
         }
       });
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao excluir orçamento', 500);
     }
   }
@@ -370,7 +370,7 @@ export class QuoteRepository {
       });
 
       return this.mapToResponseDTO(quote);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao restaurar orçamento', 500);
     }
   }
@@ -387,7 +387,7 @@ export class QuoteRepository {
           deletedAt: null
         },
         data: {
-          status: status as any,
+          status: status as string,
           updatedAt: new Date()
         },
         include: {
@@ -416,7 +416,7 @@ export class QuoteRepository {
       });
 
       return this.mapToResponseDTO(quote);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao atualizar status do orçamento', 500);
     }
   }
@@ -424,7 +424,7 @@ export class QuoteRepository {
   /**
    * Duplica orçamento
    */
-  async duplicate(id: string, data: any, userId: string, companyId: string): Promise<QuoteResponseDTO> {
+  async duplicate(id: string, data: Record<string, unknown>, userId: string, companyId: string): Promise<QuoteResponseDTO> {
     try {
       const originalQuote = await this.prisma.quote.findFirst({
         where: {
@@ -502,7 +502,7 @@ export class QuoteRepository {
       });
 
       return this.mapToResponseDTO(quote);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao duplicar orçamento', 500);
     }
   }
@@ -590,7 +590,7 @@ export class QuoteRepository {
       const statusMap = byStatus.reduce((acc, item) => {
         acc[item.status.toLowerCase()] = item._count;
         return acc;
-      }, {} as any);
+      }, {} as Record<string, number>);
 
       const conversionRate = sentQuotes > 0 ? (statusMap.approved || 0) / sentQuotes * 100 : 0;
 
@@ -620,7 +620,7 @@ export class QuoteRepository {
           approvedValue: lastMonthApproved._sum.totalValue || 0
         }
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao obter estatísticas', 500);
     }
   }
@@ -630,7 +630,7 @@ export class QuoteRepository {
    */
   async findForReport(filters: QuoteFiltersDTO, companyId: string): Promise<QuoteReportDTO[]> {
     try {
-      const where: any = {
+      const where: Record<string, unknown> = {
         companyId,
         deletedAt: null
       };
@@ -691,7 +691,7 @@ export class QuoteRepository {
         createdAt: quote.createdAt.toISOString(),
         createdByName: quote.createdByUser.name
       }));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao gerar relatório', 500);
     }
   }
@@ -712,9 +712,9 @@ export class QuoteRepository {
   /**
    * Mapeia entidade para DTO de resposta
    */
-  private mapToResponseDTO(quote: any): QuoteResponseDTO {
+  private mapToResponseDTO(quote: Record<string, unknown>): QuoteResponseDTO {
     // Calcula valores dos itens
-    const items = quote.items.map((item: any) => {
+    const items = (quote.items as Record<string, unknown>[]).map((item: Record<string, unknown>) => {
       const subtotal = item.quantity * item.unitPrice;
       const discountValue = item.discountType === 'PERCENTAGE' 
         ? subtotal * (item.discount / 100)

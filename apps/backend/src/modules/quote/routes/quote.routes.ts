@@ -14,7 +14,7 @@ import {
   convertToOrderSchema
 } from '../dtos';
 import { QuoteService } from '../services';
-import { requirePermission, requireRole } from '../../../shared/middlewares/auth';
+import { requirePermission, requireRole as _requireRole } from '../../../shared/middlewares/auth';
 import { createValidation } from '../../../shared/middlewares/validation';
 import { extractTenant } from '../../../shared/middlewares/tenant';
 import { PrismaClient } from '@prisma/client';
@@ -56,10 +56,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: quote,
           message: 'Orçamento criado com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -88,10 +89,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: result.quotes,
           pagination: result.pagination
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -116,10 +118,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           success: true,
           data: quote
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -150,10 +153,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: quote,
           message: 'Orçamento atualizado com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -178,10 +182,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           success: true,
           message: 'Orçamento excluído com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -207,10 +212,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: quote,
           message: 'Orçamento restaurado com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -241,10 +247,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: quote,
           message: 'Status do orçamento atualizado com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -275,10 +282,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: quote,
           message: 'Orçamento duplicado com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -309,10 +317,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           data: result,
           message: 'Orçamento convertido em OS com sucesso'
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -334,10 +343,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           success: true,
           data: stats
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }
@@ -374,10 +384,11 @@ export async function quoteRoutes(fastify: FastifyInstance) {
           success: true,
           data: report
         });
-      } catch (error: any) {
-        return reply.status(error.statusCode || 500).send({
+      } catch (error: unknown) {
+        const err = error as { statusCode?: number; message?: string };
+        return reply.status(err.statusCode || 500).send({
           success: false,
-          message: error.message || 'Erro interno do servidor'
+          message: err.message || 'Erro interno do servidor'
         });
       }
     }

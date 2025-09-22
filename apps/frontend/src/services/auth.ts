@@ -4,7 +4,6 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
-  RefreshTokenRequest,
   RefreshTokenResponse,
   ForgotPasswordRequest,
   ResetPasswordRequest,

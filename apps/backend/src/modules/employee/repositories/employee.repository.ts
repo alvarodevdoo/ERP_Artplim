@@ -1,9 +1,8 @@
-import { PrismaClient, Employee, Prisma } from '@prisma/client';
+import { PrismaClient as _PrismaClient, Prisma } from '@prisma/client';
 import {
   CreateEmployeeDto,
   UpdateEmployeeDto,
-  EmployeeFiltersDto,
-  EmployeeStatsDto
+  EmployeeFiltersDto
 } from '../dtos';
 import { prisma } from '../../../database/connection';
 
@@ -289,7 +288,8 @@ export class EmployeeRepository {
    * @param onlyActive Se deve retornar apenas funcionários ativos
    * @returns Lista de funcionários
    */
-  async findByCompany(companyId: string, onlyActive: boolean = true) {
+  async findByCompany(companyId: string, _onlyActive: boolean = true) {
+    // TODO: Implementar filtro por status ativo quando necessário
     return prisma.employee.findMany({
       where: {
         companyId,

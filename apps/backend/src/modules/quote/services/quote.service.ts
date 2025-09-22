@@ -300,7 +300,7 @@ export class QuoteService {
         orderNumber: result.number,
         message: 'Orçamento convertido em OS com sucesso'
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao converter orçamento em OS', 500);
     }
   }

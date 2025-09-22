@@ -4,7 +4,11 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
+import { StockItemModal } from '@/components/StockItemModal'
+import { StockItemViewModal } from '@/components/StockItemViewModal'
+import { StockMovementModal } from '@/components/StockMovementModal'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface StockItem {
   id: string
@@ -39,6 +43,17 @@ export function StockPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [stockFilter, setStockFilter] = useState('all')
+  
+  // Estados para modais
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isMovementModalOpen, setIsMovementModalOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedItem, setSelectedItem] = useState<StockItem | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<StockItem | null>(null)
+  const [movementType, setMovementType] = useState<'in' | 'out' | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     // Simular carregamento de estoque
@@ -171,16 +186,154 @@ export function StockPage() {
     }
   }
 
+  // Handlers para modais
+  const handleNewItem = () => {
+    setModalMode('create')
+    setSelectedItem(null)
+    setIsItemModalOpen(true)
+  }
+
   const handleView = (itemId: string) => {
-    toast.info(`Visualizar item ${itemId}`)
+    const item = stockItems.find(p => p.id === itemId)
+    if (item) {
+      setSelectedItem(item)
+      setIsViewModalOpen(true)
+    }
   }
 
   const handleEdit = (itemId: string) => {
-    toast.info(`Editar item ${itemId}`)
+    const item = stockItems.find(p => p.id === itemId)
+    if (item) {
+      setSelectedItem(item)
+      setModalMode('edit')
+      setIsItemModalOpen(true)
+    }
   }
 
   const handleMovement = (itemId: string) => {
-    toast.info(`Registrar movimentação para item ${itemId}`)
+    const item = stockItems.find(p => p.id === itemId)
+    if (item) {
+      setSelectedItem(item)
+      setMovementType(null)
+      setIsMovementModalOpen(true)
+    }
+  }
+
+  const handleEntryMovement = () => {
+    setMovementType('in')
+    setSelectedItem(null)
+    setIsMovementModalOpen(true)
+  }
+
+  const handleExitMovement = () => {
+    setMovementType('out')
+    setSelectedItem(null)
+    setIsMovementModalOpen(true)
+  }
+
+  const handleSaveItem = async (itemData: Partial<StockItem>) => {
+    setActionLoading(true)
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (modalMode === 'create') {
+        const newItem: StockItem = {
+          id: Date.now().toString(),
+          ...itemData as Omit<StockItem, 'id'>,
+          lastMovement: {
+            type: 'in',
+            quantity: itemData.currentStock || 0,
+            date: new Date().toISOString().split('T')[0],
+            reason: 'Cadastro inicial'
+          }
+        }
+        setStockItems(prev => [...prev, newItem])
+        toast.success('Item criado com sucesso!')
+      } else {
+        setStockItems(prev => prev.map(item => 
+          item.id === selectedItem?.id 
+            ? { ...item, ...itemData }
+            : item
+        ))
+        toast.success('Item atualizado com sucesso!')
+      }
+      
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao salvar item')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleSaveMovement = async (movementData: { type: 'in' | 'out'; quantity: number; reason?: string; date?: string }) => {
+    setActionLoading(true)
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (selectedItem) {
+        const newStock = movementData.type === 'in' 
+          ? selectedItem.currentStock + movementData.quantity
+          : selectedItem.currentStock - movementData.quantity
+        
+        const newTotalValue = newStock * selectedItem.unitCost
+        
+        setStockItems(prev => prev.map(item => 
+          item.id === selectedItem.id 
+            ? { 
+                ...item, 
+                currentStock: newStock,
+                totalValue: newTotalValue,
+                lastMovement: {
+                  ...movementData,
+                  date: movementData.date || new Date().toISOString().split('T')[0],
+                  reason: movementData.reason || 'Movimentação'
+                }
+              }
+            : item
+        ))
+        
+        toast.success(`${movementData.type === 'in' ? 'Entrada' : 'Saída'} registrada com sucesso!`)
+      }
+      
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao registrar movimentação')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return
+    
+    setActionLoading(true)
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setStockItems(prev => prev.filter(item => item.id !== itemToDelete.id))
+      toast.success('Item excluído com sucesso!')
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao excluir item')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCloseModals = () => {
+    setIsItemModalOpen(false)
+    setIsViewModalOpen(false)
+    setIsMovementModalOpen(false)
+    setIsConfirmDialogOpen(false)
+    setSelectedItem(null)
+    setItemToDelete(null)
+    setMovementType(null)
   }
 
   const formatCurrency = (value: number) => {
@@ -212,15 +365,15 @@ export function StockPage() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleEntryMovement}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Entrada
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExitMovement}>
             <TrendingDown className="mr-2 h-4 w-4" />
             Saída
           </Button>
-          <Button>
+          <Button onClick={handleNewItem}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Item
           </Button>
@@ -382,7 +535,7 @@ export function StockPage() {
                           <span className="text-gray-600">Última Movimentação: </span>
                           <span className="font-medium">
                             {item.lastMovement.type === 'in' ? 'Entrada' : 'Saída'} de {item.lastMovement.quantity} un. 
-                            em {formatDate(item.lastMovement.date)} ({item.lastMovement.reason})
+                            em {formatDate(item.lastMovement.date || '')} ({item.lastMovement.reason})
                           </span>
                         </div>
                       </div>
@@ -421,6 +574,40 @@ export function StockPage() {
           })}
         </div>
       )}
+      
+      {/* Modais */}
+      <StockItemModal
+        isOpen={isItemModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveItem}
+        item={selectedItem}
+        mode={modalMode}
+      />
+      
+      <StockItemViewModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseModals}
+        item={selectedItem}
+      />
+      
+      <StockMovementModal
+        isOpen={isMovementModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveMovement}
+        item={selectedItem}
+        movementType={movementType}
+      />
+      
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Item de Estoque"
+        description={`Tem certeza que deseja excluir o item ${itemToDelete?.productName}? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

@@ -66,7 +66,7 @@ function App() {
 
   useEffect(() => {
     initializeAuth()
-  }, [])
+  }, [initializeAuth])
 
   return (
     <Routes>

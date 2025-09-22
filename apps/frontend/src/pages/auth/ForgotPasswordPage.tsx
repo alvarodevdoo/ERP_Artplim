@@ -27,13 +27,13 @@ export function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
+  const onSubmit = async () => {
     try {
       // Simular envio de email de recuperação
       await new Promise(resolve => setTimeout(resolve, 2000))
       setIsSubmitted(true)
       toast.success('Email de recuperação enviado!')
-    } catch (error: any) {
+    } catch {
       toast.error('Erro ao enviar email de recuperação')
     }
   }

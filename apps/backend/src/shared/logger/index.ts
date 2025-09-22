@@ -1,5 +1,4 @@
 import pino from 'pino';
-import { FastifyBaseLogger } from 'fastify';
 
 /**
  * Configuração do sistema de logging usando Pino
@@ -86,7 +85,7 @@ export const dbLogger = createContextLogger('DATABASE');
 export const logError = (
   error: Error,
   context: string,
-  additionalInfo?: Record<string, any>
+  additionalInfo?: Record<string, unknown>
 ) => {
   logger.error(
     {
@@ -110,7 +109,7 @@ export const logUserAction = (
   userId: string,
   action: string,
   resource: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) => {
   auditLogger.info(
     {
@@ -156,7 +155,7 @@ export const logPersonalDataAccess = (
  * @param res - Response object
  * @param next - Next function
  */
-export const requestLogger = (req: any, res: any, next: () => void) => {
+export const requestLogger = (req: { method: string; url: string; headers: Record<string, string>; ip: string }, res: { statusCode: number; on: (event: string, callback: () => void) => void }, next: () => void) => {
   const start = Date.now();
   
   logger.info(

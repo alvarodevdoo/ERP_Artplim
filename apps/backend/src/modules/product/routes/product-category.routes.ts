@@ -11,6 +11,16 @@ import { authMiddleware } from '../../../shared/middlewares/auth';
 import { tenantMiddleware } from '../../../shared/middlewares/tenant';
 import { createValidation } from '../../../shared/middlewares/validation';
 
+// Função auxiliar para tratamento de erros
+function handleError(error: unknown, reply: FastifyReply) {
+  const statusCode = error instanceof Error && 'statusCode' in error ? (error as { statusCode: number }).statusCode : 500;
+  const message = error instanceof Error ? error.message : 'Erro interno do servidor';
+  return reply.code(statusCode).send({
+    success: false,
+    message
+  });
+}
+
 /**
  * Rotas para gerenciamento de categorias de produtos
  */
@@ -42,11 +52,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           data: category,
           message: 'Categoria criada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -87,11 +94,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
             totalPages: result.totalPages
           }
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -119,11 +123,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: category
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -154,11 +155,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           data: category,
           message: 'Categoria atualizada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -179,11 +177,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           message: 'Categoria excluída com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -205,11 +200,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           data: category,
           message: 'Categoria restaurada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -228,11 +220,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: categories
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -253,11 +242,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: children
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -295,11 +281,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: result
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -329,11 +312,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           message: 'Categorias reordenadas com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -352,11 +332,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: tree
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -389,11 +366,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           data: category,
           message: 'Categoria movida com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -427,11 +401,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           data: category,
           message: 'Categoria duplicada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -473,11 +444,8 @@ export async function productCategoryRoutes(fastify: FastifyInstance) {
           success: true,
           data: stats
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );

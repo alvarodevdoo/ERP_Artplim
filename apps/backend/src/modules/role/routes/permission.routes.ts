@@ -5,8 +5,7 @@ import {
   UpdatePermissionDto,
   PermissionFiltersDto,
   createPermissionDto,
-  updatePermissionDto,
-  permissionFiltersDto
+  updatePermissionDto
 } from '../dtos';
 import { authMiddleware } from '../../../shared/middlewares/auth';
 import { tenantMiddleware } from '../../../shared/middlewares/tenant';

@@ -175,7 +175,7 @@ export function validateDate(date: string): boolean {
  * @param value Valor para validar
  * @returns true se válido, false caso contrário
  */
-export function validatePositiveNumber(value: any): boolean {
+export function validatePositiveNumber(value: unknown): boolean {
   const num = Number(value);
   return !isNaN(num) && num > 0;
 }

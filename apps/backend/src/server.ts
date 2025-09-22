@@ -5,7 +5,6 @@ import rateLimit from '@fastify/rate-limit';
 import multipart from '@fastify/multipart';
 import { config } from './config';
 import { prisma } from './database/client';
-import { logger } from './shared/logger/index';
 import { errorHandler } from './shared/middlewares/error-handler';
 import { authMiddleware } from './shared/middlewares/auth';
 import { tenantMiddleware } from './shared/middlewares/tenant';

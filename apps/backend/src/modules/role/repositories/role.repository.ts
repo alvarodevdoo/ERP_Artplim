@@ -1,5 +1,5 @@
 import { PrismaClient, Role, Permission, Prisma } from '@prisma/client';
-import { RoleFiltersDto, PermissionFiltersDto } from '../dtos';
+import { RoleFiltersDto } from '../dtos';
 
 /**
  * Repositório para operações de Role e Permission

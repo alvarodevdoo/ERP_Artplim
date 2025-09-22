@@ -537,7 +537,7 @@ export async function employeeRoutes(fastify: FastifyInstance) {
           success: true,
           data: { available: !exists }
         });
-      } catch (error) {
+      } catch {
         reply.code(500).send({
           success: false,
           message: 'Erro interno do servidor'
@@ -565,7 +565,7 @@ export async function employeeRoutes(fastify: FastifyInstance) {
           success: true,
           data: { available: !exists }
         });
-      } catch (error) {
+      } catch {
         reply.code(500).send({
           success: false,
           message: 'Erro interno do servidor'

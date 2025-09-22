@@ -64,7 +64,7 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: movement,
         message: 'Entrada de estoque registrada com sucesso'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return reply.status(error.statusCode || 500).send({
         success: false,
         message: error.message || 'Erro interno do servidor'
@@ -96,11 +96,12 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: movement,
         message: 'Saída de estoque registrada com sucesso'
-      });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+      });  
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -130,10 +131,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: movement,
         message: 'Ajuste de estoque realizado com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -163,10 +165,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: movement,
         message: 'Transferência de estoque realizada com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -201,10 +204,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
           totalPages: Math.ceil(result.total / (request.query.limit || 20))
         }
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -239,10 +243,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: stockItem
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -277,10 +282,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
           totalPages: Math.ceil(result.total / (request.query.limit || 20))
         }
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -310,10 +316,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: reservation,
         message: 'Reserva de estoque criada com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -344,10 +351,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Reserva cancelada com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -382,10 +390,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
           totalPages: Math.ceil(result.total / (request.query.limit || 20))
         }
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -415,10 +424,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: location,
         message: 'Localização criada com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -451,10 +461,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: location
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -486,10 +497,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         data: location,
         message: 'Localização atualizada com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -515,10 +527,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Localização removida com sucesso'
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -541,10 +554,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: stats
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -577,10 +591,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: report
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -619,10 +634,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: report
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -645,10 +661,11 @@ export async function stockRoutes(fastify: FastifyInstance) {
         success: true,
         data: dashboard
       });
-    } catch (error: any) {
-      return reply.status(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.status(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
