@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, TrendingUp, TrendingDown, DollarSign, Calendar, Filter, Eye, Edit, Trash2 } from 'lucide-react'
+import { Search, TrendingUp, TrendingDown, DollarSign, Calendar, Eye, Edit, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
+import { FinancialEntryModal } from '@/components/FinancialEntryModal'
+import { FinancialEntryViewModal } from '@/components/FinancialEntryViewModal'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface FinancialEntry {
   id: string
@@ -42,6 +45,16 @@ export function FinancialPage() {
   const [selectedType, setSelectedType] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  
+  // Estados dos modais
+  const [isEntryModalOpen, setIsEntryModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedEntry, setSelectedEntry] = useState<FinancialEntry | null>(null)
+  const [entryToDelete, setEntryToDelete] = useState<FinancialEntry | null>(null)
+  const [defaultEntryType, setDefaultEntryType] = useState<'income' | 'expense'>('income')
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     // Simular carregamento de dados financeiros
@@ -189,16 +202,101 @@ export function FinancialPage() {
     return type === 'income' ? 'text-green-600' : 'text-red-600'
   }
 
+  // Handlers dos modais
+  const handleNewIncome = () => {
+    setDefaultEntryType('income')
+    setModalMode('create')
+    setSelectedEntry(null)
+    setIsEntryModalOpen(true)
+  }
+
+  const handleNewExpense = () => {
+    setDefaultEntryType('expense')
+    setModalMode('create')
+    setSelectedEntry(null)
+    setIsEntryModalOpen(true)
+  }
+
   const handleView = (entryId: string) => {
-    toast.info(`Visualizar lançamento ${entryId}`)
+    const entry = entries.find(e => e.id === entryId)
+    if (entry) {
+      setSelectedEntry(entry)
+      setIsViewModalOpen(true)
+    }
   }
 
   const handleEdit = (entryId: string) => {
-    toast.info(`Editar lançamento ${entryId}`)
+    const entry = entries.find(e => e.id === entryId)
+    if (entry) {
+      setSelectedEntry(entry)
+      setModalMode('edit')
+      setIsEntryModalOpen(true)
+    }
   }
 
   const handleDelete = (entryId: string) => {
-    toast.info(`Excluir lançamento ${entryId}`)
+    const entry = entries.find(e => e.id === entryId)
+    if (entry) {
+      setEntryToDelete(entry)
+      setIsConfirmDialogOpen(true)
+    }
+  }
+
+  const handleSaveEntry = async (entryData: Omit<FinancialEntry, 'id'>) => {
+    setActionLoading(true)
+    try {
+      // Simular salvamento
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (modalMode === 'create') {
+        const newEntry: FinancialEntry = {
+          ...entryData,
+          id: Date.now().toString()
+        }
+        setEntries(prev => [...prev, newEntry])
+        toast.success('Lançamento criado com sucesso!')
+      } else {
+        setEntries(prev => prev.map(entry => 
+          entry.id === selectedEntry?.id 
+            ? { ...entryData, id: entry.id }
+            : entry
+        ))
+        toast.success('Lançamento atualizado com sucesso!')
+      }
+      
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao salvar lançamento')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!entryToDelete) return
+    
+    setActionLoading(true)
+    try {
+      // Simular exclusão
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setEntries(prev => prev.filter(entry => entry.id !== entryToDelete.id))
+      toast.success('Lançamento excluído com sucesso!')
+      handleCloseModals()
+    } catch {
+      toast.error('Erro ao excluir lançamento')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCloseModals = () => {
+    setIsEntryModalOpen(false)
+    setIsViewModalOpen(false)
+    setIsConfirmDialogOpen(false)
+    setSelectedEntry(null)
+    setEntryToDelete(null)
+    setActionLoading(false)
   }
 
   const formatCurrency = (value: number) => {
@@ -230,11 +328,11 @@ export function FinancialPage() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleNewIncome}>
             <TrendingUp className="mr-2 h-4 w-4" />
             Nova Receita
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleNewExpense}>
             <TrendingDown className="mr-2 h-4 w-4" />
             Nova Despesa
           </Button>
@@ -469,6 +567,33 @@ export function FinancialPage() {
           ))}
         </div>
       )}
+      
+      {/* Modais */}
+      <FinancialEntryModal
+        isOpen={isEntryModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveEntry}
+        entry={selectedEntry}
+        mode={modalMode}
+        defaultType={defaultEntryType}
+      />
+      
+      <FinancialEntryViewModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseModals}
+        entry={selectedEntry}
+      />
+      
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Lançamento"
+        description={`Tem certeza que deseja excluir o lançamento "${entryToDelete?.description || 'selecionado'}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

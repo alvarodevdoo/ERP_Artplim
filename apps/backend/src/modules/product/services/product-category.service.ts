@@ -310,9 +310,10 @@ export class ProductCategoryService {
    */
   private async validateCategoryData(
     data: CreateProductCategoryDto | UpdateProductCategoryDto,
-    companyId: string,
-    excludeId?: string
+    _companyId: string,
+    _excludeId?: string
   ): Promise<void> {
+    // _companyId e _excludeId não são usados atualmente, mas podem ser necessários para validações futuras
     // Validar nome
     if (data.name) {
       if (data.name.length < 2) {
@@ -375,7 +376,7 @@ export class ProductCategoryService {
       }
 
       return { canDelete: true };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar se categoria pode ser deletada', 500);
     }
   }
@@ -413,11 +414,12 @@ export class ProductCategoryService {
    * TODO: Implementar validação de permissões quando RoleService estiver disponível
    */
   private async validatePermission(
-    userId: string,
-    companyId: string,
-    resource: string,
-    action: string
+    _userId: string,
+    _companyId: string,
+    _resource: string,
+    _action: string
   ): Promise<void> {
+    // Parâmetros não são usados atualmente, mas serão necessários quando RoleService estiver implementado
     // TODO: Implementar validação de permissões
     // const hasPermission = await this.roleService.checkPermission(
     //   userId,

@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { AppError } from '../../../shared/errors/AppError';
 import {
   StockMovementDTO,
-  StockAdjustmentDTO,
-  StockTransferDTO,
   StockReservationDTO,
   CancelStockReservationDTO,
   StockFiltersDTO,
@@ -98,7 +95,7 @@ export class StockRepository {
    * Lista itens de estoque com filtros
    */
   async findMany(filters: StockFiltersDTO, companyId: string): Promise<{ items: StockItemResponseDTO[]; total: number }> {
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId,
       deletedAt: null
     };
@@ -337,7 +334,7 @@ export class StockRepository {
    * Lista movimentações de estoque
    */
   async findMovements(filters: StockMovementFiltersDTO, companyId: string): Promise<{ items: StockMovementResponseDTO[]; total: number }> {
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId,
       deletedAt: null
     };
@@ -592,7 +589,7 @@ export class StockRepository {
    * Lista reservas de estoque
    */
   async findReservations(filters: StockReservationFiltersDTO, companyId: string): Promise<{ items: StockReservationResponseDTO[]; total: number }> {
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId,
       deletedAt: null
     };
@@ -904,7 +901,7 @@ export class StockRepository {
       acc[key].totalProducts += 1;
       
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, { locationId: string | null; locationName: string | null; totalValue: number; totalProducts: number }>);
 
     return {
       totalProducts,
@@ -978,7 +975,7 @@ export class StockRepository {
    * Gera relatório de movimentações
    */
   async findMovementsForReport(companyId: string, startDate?: string, endDate?: string): Promise<StockMovementReportDTO[]> {
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId,
       deletedAt: null
     };

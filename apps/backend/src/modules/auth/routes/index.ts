@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { AuthService } from '../services/auth.service';
-import { createValidation, commonSchemas } from '../../../shared/middlewares/validation';
+import { createValidation } from '../../../shared/middlewares/validation';
 import {
   loginDto,
   registerDto,
@@ -9,6 +9,13 @@ import {
   resetPasswordDto,
   changePasswordDto,
   updateProfileDto,
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+  UpdateProfileDto,
 } from '../dtos';
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -18,7 +25,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     preHandler: createValidation({ body: loginDto }),
   }, async (request, reply) => {
     try {
-      const result = await authService.login(request.body as any);
+      const result = await authService.login(request.body as LoginDto);
       return reply.send(result);
     } catch (error) {
       return reply.status(401).send({
@@ -33,7 +40,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     preHandler: createValidation({ body: registerDto }),
   }, async (request, reply) => {
     try {
-      const result = await authService.register(request.body as any);
+      const result = await authService.register(request.body as RegisterDto);
       return reply.status(201).send(result);
     } catch (error) {
       return reply.status(400).send({
@@ -48,7 +55,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     preHandler: createValidation({ body: refreshTokenDto }),
   }, async (request, reply) => {
     try {
-      const result = await authService.refreshToken(request.body as any);
+      const result = await authService.refreshToken(request.body as RefreshTokenDto);
       return reply.send(result);
     } catch (error) {
       return reply.status(401).send({
@@ -63,16 +70,16 @@ export async function authRoutes(fastify: FastifyInstance) {
     preHandler: createValidation({ body: forgotPasswordDto }),
   }, async (request, reply) => {
     try {
-      await authService.forgotPassword(request.body as any);
+      await authService.forgotPassword(request.body as ForgotPasswordDto);
       return reply.send({
         message: 'If the email exists, a password reset link has been sent',
       });
-    } catch (error) {
-      return reply.status(500).send({
-        error: 'Password Reset Failed',
-        message: 'Unable to process password reset request',
-      });
-    }
+    } catch (_error) {
+        return reply.status(500).send({
+          error: 'Password Reset Failed',
+          message: 'Unable to process password reset request',
+        });
+      }
   });
 
   // Reset password
@@ -80,7 +87,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     preHandler: createValidation({ body: resetPasswordDto }),
   }, async (request, reply) => {
     try {
-      await authService.resetPassword(request.body as any);
+      await authService.resetPassword(request.body as ResetPasswordDto);
       return reply.send({
         message: 'Password has been reset successfully',
       });
@@ -104,7 +111,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      await authService.changePassword(request.userId, request.body as any);
+      await authService.changePassword(request.userId, request.body as ChangePasswordDto);
       return reply.send({
         message: 'Password changed successfully',
       });
@@ -128,7 +135,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const user = await authService.updateProfile(request.userId, request.body as any);
+      const user = await authService.updateProfile(request.userId, request.body as UpdateProfileDto);
       return reply.send({
         message: 'Profile updated successfully',
         user: {
@@ -175,7 +182,7 @@ export async function authRoutes(fastify: FastifyInstance) {
           createdAt: user.createdAt,
         },
       });
-    } catch (error) {
+    } catch (_error) {
       return reply.status(500).send({
         error: 'User Fetch Failed',
         message: 'Unable to fetch user information',
@@ -191,7 +198,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.send({
         message: 'Logged out successfully',
       });
-    } catch (error) {
+    } catch (_error) {
       return reply.status(500).send({
         error: 'Logout Failed',
         message: 'Unable to logout',

@@ -1,7 +1,7 @@
 import { PrismaClient, User, Role, Company, Employee, Prisma } from '@prisma/client';
 import { prisma } from '../../../database/connection';
 import { logger } from '../../../shared/logger/index';
-import { RegisterDto, UpdateProfileDto } from '../dtos';
+// Imports removidos - tipos não utilizados neste arquivo
 
 /**
  * Repositório para operações de autenticação e usuários

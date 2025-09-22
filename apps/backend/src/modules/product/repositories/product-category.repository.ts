@@ -123,7 +123,7 @@ export class ProductCategoryRepository {
       });
 
       return category ? this.formatCategoryResponse(category) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar categoria', 500);
     }
   }
@@ -181,7 +181,7 @@ export class ProductCategoryRepository {
       });
 
       return categories.map(category => this.formatCategoryResponse(category));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar categorias', 500);
     }
   }
@@ -235,7 +235,7 @@ export class ProductCategoryRepository {
       });
 
       return categories.map(category => this.formatCategoryResponse(category));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar categorias raiz', 500);
     }
   }
@@ -295,7 +295,7 @@ export class ProductCategoryRepository {
       });
 
       return categories.map(category => this.formatCategoryResponse(category));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar subcategorias', 500);
     }
   }
@@ -518,7 +518,7 @@ export class ProductCategoryRepository {
       });
 
       return !!category;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar nome da categoria', 500);
     }
   }
@@ -543,7 +543,7 @@ export class ProductCategoryRepository {
       );
 
       await Promise.all(updatePromises);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao reordenar categorias', 500);
     }
   }
@@ -582,7 +582,7 @@ export class ProductCategoryRepository {
       }
 
       return false;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar referência circular', 500);
     }
   }
@@ -590,25 +590,45 @@ export class ProductCategoryRepository {
   /**
    * Formatar resposta da categoria
    */
-  private formatCategoryResponse(category: any): ProductCategoryResponseDto {
+  private formatCategoryResponse(category: unknown): ProductCategoryResponseDto {
+    const cat = category as {
+      id: string;
+      name: string;
+      description?: string;
+      parentId?: string;
+      parent?: { id: string; name: string };
+      children?: Array<{
+        id: string;
+        name: string;
+        _count?: { products: number };
+      }>;
+      isActive: boolean;
+      sortOrder: number;
+      _count?: { products: number };
+      companyId: string;
+      createdAt: Date;
+      updatedAt: Date;
+      deletedAt?: Date;
+    };
+    
     return {
-      id: category.id,
-      name: category.name,
-      description: category.description,
-      parentId: category.parentId,
-      parent: category.parent,
-      children: category.children?.map((child: any) => ({
+      id: cat.id,
+      name: cat.name,
+      description: cat.description,
+      parentId: cat.parentId,
+      parent: cat.parent,
+      children: cat.children?.map((child) => ({
         id: child.id,
         name: child.name,
         productCount: child._count?.products || 0
       })) || [],
-      isActive: category.isActive,
-      sortOrder: category.sortOrder,
-      productCount: category._count?.products || 0,
-      companyId: category.companyId,
-      createdAt: category.createdAt,
-      updatedAt: category.updatedAt,
-      deletedAt: category.deletedAt
+      isActive: cat.isActive,
+      sortOrder: cat.sortOrder,
+      productCount: cat._count?.products || 0,
+      companyId: cat.companyId,
+      createdAt: cat.createdAt,
+      updatedAt: cat.updatedAt,
+      deletedAt: cat.deletedAt
     };
   }
 }

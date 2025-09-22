@@ -812,7 +812,7 @@ export class FinancialService {
   }
 
   async generateReport(
-    filters: any,
+    filters: Record<string, unknown>,
     userId: string,
     companyId: string,
     format: 'json' | 'csv' = 'json'
@@ -925,7 +925,7 @@ export class FinancialService {
 
   // Métodos auxiliares
   private async createInstallments(
-    tx: any,
+    tx: Record<string, unknown>,
     transactionId: string,
     data: CreateTransactionDTO,
     companyId: string,
@@ -961,7 +961,7 @@ export class FinancialService {
   }
 
   private async updateAccountBalance(
-    tx: any,
+    tx: Record<string, unknown>,
     accountId: string,
     amount: number
   ): Promise<void> {

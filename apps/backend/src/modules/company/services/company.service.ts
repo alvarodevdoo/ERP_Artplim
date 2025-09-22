@@ -1,4 +1,3 @@
-import { Company } from '@prisma/client';
 import { CompanyRepository } from '../repositories';
 import { CreateCompanyDto, UpdateCompanyDto, CompanyFiltersDto, CompanyResponseDto, CompanyListResponseDto } from '../dtos';
 import { logger } from '../../../shared/logger/index';
@@ -277,7 +276,7 @@ export class CompanyService {
    * @param company Entidade Company
    * @returns DTO de resposta
    */
-  private mapToResponseDto(company: any): CompanyResponseDto {
+  private mapToResponseDto(company: Record<string, unknown>): CompanyResponseDTO {
     return {
       id: company.id,
       name: company.name,

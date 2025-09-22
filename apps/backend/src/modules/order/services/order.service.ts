@@ -285,7 +285,13 @@ export class OrderService {
       throw new AppError('Registro de tempo não encontrado', 404);
     }
 
-    let updateData: any = {
+    const updateData: {
+      startTime?: Date;
+      endTime?: Date;
+      description?: string;
+      billable?: boolean;
+      duration?: number;
+    } = {
       startTime: data.startTime ? new Date(data.startTime) : undefined,
       endTime: data.endTime ? new Date(data.endTime) : undefined,
       description: data.description,

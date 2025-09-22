@@ -4,7 +4,6 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { AuthRepository } from '../repositories/auth.repository';
 import { config } from '../../../config';
 import { logger } from '../../../shared/logger';
-import { AppError } from '../../../shared/errors/AppError';
 import {
   LoginDto,
   LoginResponseDto,
@@ -17,7 +16,6 @@ import {
   ChangePasswordDto,
   UpdateProfileDto,
 } from '../dtos';
-import { User } from '@artplim/types';
 
 /**
  * Serviço de autenticação
@@ -148,7 +146,7 @@ export class AuthService {
 
     try {
       // Verificar e decodificar refresh token
-      const decoded = jwt.verify(refreshToken, config.JWT_SECRET as string) as any;
+      const decoded = jwt.verify(refreshToken, config.JWT_SECRET as string) as { userId: string; companyId: string };
       
       // Buscar usuário
       const user = await this.authRepository.findUserById(decoded.userId);
@@ -161,7 +159,7 @@ export class AuthService {
       const tokens = await this.generateTokens(user.id, user.companyId);
 
       return tokens;
-    } catch (error) {
+    } catch {
       throw new Error('Invalid refresh token');
     }
   }
@@ -187,7 +185,7 @@ export class AuthService {
     }
   }
 
-  async resetPassword(data: ResetPasswordDto): Promise<void> {
+  async resetPassword(_data: ResetPasswordDto): Promise<void> {
     // TODO: Implementar sistema de reset de senha
     throw new Error('Reset password functionality not implemented yet');
   }
@@ -218,7 +216,7 @@ export class AuthService {
     logger.info(`Password changed for user ${user.email}`);
   }
 
-  async updateProfile(userId: string, data: UpdateProfileDto): Promise<any> {
+  async updateProfile(userId: string, data: UpdateProfileDto): Promise<Record<string, unknown>> {
     try {
       // Converte undefined para null para compatibilidade com Prisma
       const updateData: Prisma.UserUpdateInput = {};

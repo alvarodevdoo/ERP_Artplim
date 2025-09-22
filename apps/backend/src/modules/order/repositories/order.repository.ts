@@ -5,14 +5,9 @@ import {
   OrderFiltersDTO, 
   UpdateOrderStatusDTO,
   AssignOrderDTO,
-  AddOrderTimeTrackingDTO,
-  UpdateOrderTimeTrackingDTO,
-  AddOrderExpenseDTO,
-  UpdateOrderExpenseDTO,
   OrderResponseDTO,
   OrderStatsDTO,
-  OrderReportDTO,
-  OrderDashboardDTO
+  OrderReportDTO
 } from '../dtos';
 import { AppError } from '../../../shared/errors/AppError';
 
@@ -142,7 +137,7 @@ export class OrderRepository {
       });
 
       return this.formatOrderResponse(order);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao criar ordem de serviço', 500);
     }
   }
@@ -204,7 +199,7 @@ export class OrderRepository {
       });
 
       return order ? this.formatOrderResponse(order) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar ordem de serviço', 500);
     }
   }
@@ -220,7 +215,7 @@ export class OrderRepository {
     totalPages: number;
   }> {
     try {
-      const where: any = {
+      const where: Record<string, unknown> = {
         companyId,
         deletedAt: null
       };
@@ -342,7 +337,7 @@ export class OrderRepository {
         limit: filters.limit,
         totalPages: Math.ceil(total / filters.limit)
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao listar ordens de serviço', 500);
     }
   }
@@ -370,7 +365,7 @@ export class OrderRepository {
         throw new AppError('Não é possível editar uma ordem finalizada ou cancelada', 400);
       }
 
-      let updateData: any = {
+      let updateData: Record<string, unknown> = {
         customerId: data.customerId,
         title: data.title,
         description: data.description,
@@ -631,7 +626,7 @@ export class OrderRepository {
         throw new AppError(`Transição de status inválida: ${order.status} -> ${data.status}`, 400);
       }
 
-      let updateData: any = {
+      const updateData: Record<string, unknown> = {
         status: data.status
       };
 
@@ -984,7 +979,7 @@ export class OrderRepository {
         totalHours: totalHours._sum.duration || 0,
         totalExpenses: totalExpenses._sum.amount || 0
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao obter estatísticas das ordens de serviço', 500);
     }
   }
@@ -994,7 +989,7 @@ export class OrderRepository {
    */
   async findForReport(filters: OrderFiltersDTO, companyId: string): Promise<OrderReportDTO[]> {
     try {
-      const where: any = {
+      const where: Record<string, unknown> = {
         companyId,
         deletedAt: null
       };
@@ -1073,7 +1068,7 @@ export class OrderRepository {
         createdAt: order.createdAt.toISOString(),
         createdByName: order.createdByUser.name
       }));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar ordens para relatório', 500);
     }
   }
@@ -1081,7 +1076,7 @@ export class OrderRepository {
   /**
    * Formata a resposta da ordem
    */
-  private formatOrderResponse(order: any): OrderResponseDTO {
+  private formatOrderResponse(order: Record<string, unknown>): OrderResponseDTO {
     return {
       id: order.id,
       number: order.number,
@@ -1107,7 +1102,7 @@ export class OrderRepository {
       totalValue: order.totalValue,
       assignedTo: order.assignedTo,
       assignedToName: order.assignedToUser?.name,
-      items: order.items.map((item: any) => ({
+      items: order.items.map((item: Record<string, unknown>) => ({
         id: item.id,
         productId: item.productId,
         productName: item.product.name,
@@ -1120,7 +1115,7 @@ export class OrderRepository {
         total: item.total,
         observations: item.observations
       })),
-      timeTracking: order.timeTracking.map((tracking: any) => ({
+      timeTracking: order.timeTracking.map((tracking: Record<string, unknown>) => ({
         id: tracking.id,
         employeeId: tracking.employeeId,
         employeeName: tracking.employee.name,
@@ -1131,7 +1126,7 @@ export class OrderRepository {
         billable: tracking.billable,
         createdAt: tracking.createdAt
       })),
-      expenses: order.expenses.map((expense: any) => ({
+      expenses: order.expenses.map((expense: Record<string, unknown>) => ({
         id: expense.id,
         description: expense.description,
         amount: expense.amount,
@@ -1141,8 +1136,8 @@ export class OrderRepository {
         billable: expense.billable,
         createdAt: expense.createdAt
       })),
-      totalHours: order.timeTracking.reduce((sum: number, t: any) => sum + (t.duration || 0), 0),
-      totalExpenses: order.expenses.reduce((sum: number, e: any) => sum + e.amount, 0),
+      totalHours: order.timeTracking.reduce((sum: number, t: Record<string, unknown>) => sum + (t.duration || 0), 0),
+      totalExpenses: order.expenses.reduce((sum: number, e: Record<string, unknown>) => sum + e.amount, 0),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       createdBy: order.createdBy,

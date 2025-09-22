@@ -83,7 +83,7 @@ export class StockMovementRepository {
       });
 
       return movement ? this.formatMovementResponse(movement) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar movimentação', 500);
     }
   }
@@ -173,7 +173,7 @@ export class StockMovementRepository {
         limit,
         totalPages
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar movimentações', 500);
     }
   }
@@ -216,7 +216,7 @@ export class StockMovementRepository {
       });
 
       return movements.map(movement => this.formatMovementResponse(movement));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar movimentações do produto', 500);
     }
   }
@@ -263,7 +263,7 @@ export class StockMovementRepository {
       });
 
       return movements.map(movement => this.formatMovementResponse(movement));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar movimentações por período', 500);
     }
   }
@@ -401,7 +401,7 @@ export class StockMovementRepository {
         movementsByType: typeStats,
         movementsByDay
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao obter estatísticas de movimentações', 500);
     }
   }
@@ -442,7 +442,7 @@ export class StockMovementRepository {
       });
 
       return movements.map(movement => this.formatMovementResponse(movement));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar movimentações recentes', 500);
     }
   }
@@ -484,7 +484,7 @@ export class StockMovementRepository {
       });
 
       return Math.max(0, currentStock); // Não permitir estoque negativo
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao calcular estoque atual', 500);
     }
   }
@@ -492,7 +492,22 @@ export class StockMovementRepository {
   /**
    * Formatar resposta da movimentação
    */
-  private formatMovementResponse(movement: any): StockMovementResponseDto {
+  private formatMovementResponse(movement: {
+    id: string;
+    productId: string;
+    product: { id: string; name: string; sku: string; unit: string };
+    type: string;
+    quantity: number;
+    unitCost: number | null;
+    totalCost: number | null;
+    reason: string;
+    reference: string | null;
+    userId: string;
+    user: { id: string; name: string; email: string };
+    companyId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }): StockMovementResponseDto {
     return {
       id: movement.id,
       productId: movement.productId,

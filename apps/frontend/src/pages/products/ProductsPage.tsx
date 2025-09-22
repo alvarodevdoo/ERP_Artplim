@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Filter, Edit, Trash2, Package } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Package } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { ProductModal } from '@/components/ProductModal'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface Product {
   id: string
@@ -22,6 +24,14 @@ export function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  
+  // Estados para modais
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     // Simular carregamento de produtos
@@ -77,12 +87,79 @@ export function ProductsPage() {
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
 
+  // Handlers para modais
+  const handleNewProduct = () => {
+    setModalMode('create')
+    setSelectedProduct(null)
+    setIsProductModalOpen(true)
+  }
+
   const handleEdit = (productId: string) => {
-    toast.info(`Editar produto ${productId}`)
+    const product = products.find(p => p.id === productId)
+    if (product) {
+      setModalMode('edit')
+      setSelectedProduct(product)
+      setIsProductModalOpen(true)
+    }
   }
 
   const handleDelete = (productId: string) => {
-    toast.info(`Excluir produto ${productId}`)
+    const product = products.find(p => p.id === productId)
+    if (product) {
+      setProductToDelete(product)
+      setIsConfirmDialogOpen(true)
+    }
+  }
+
+  const handleSaveProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
+    try {
+      if (modalMode === 'create') {
+        // Criar novo produto
+        const newProduct: Product = {
+          ...productData,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString().split('T')[0]
+        }
+        setProducts(prev => [...prev, newProduct])
+        toast.success('Produto criado com sucesso!')
+      } else {
+        // Editar produto existente
+        setProducts(prev => prev.map(p => 
+          p.id === selectedProduct?.id 
+            ? { ...p, ...productData }
+            : p
+        ))
+        toast.success('Produto atualizado com sucesso!')
+      }
+    } catch {
+      toast.error('Erro ao salvar produto')
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return
+    
+    setActionLoading(true)
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setProducts(prev => prev.filter(p => p.id !== productToDelete.id))
+      toast.success('Produto excluído com sucesso!')
+      setIsConfirmDialogOpen(false)
+      setProductToDelete(null)
+    } catch {
+      toast.error('Erro ao excluir produto')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCloseModals = () => {
+    setIsProductModalOpen(false)
+    setIsConfirmDialogOpen(false)
+    setSelectedProduct(null)
+    setProductToDelete(null)
   }
 
   const formatCurrency = (value: number) => {
@@ -109,7 +186,7 @@ export function ProductsPage() {
           <p className="text-gray-600">Gerencie seu catálogo de produtos</p>
         </div>
         
-        <Button>
+        <Button onClick={handleNewProduct}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Produto
         </Button>
@@ -227,6 +304,27 @@ export function ProductsPage() {
           ))}
         </div>
       )}
+      
+      {/* Modais */}
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={handleCloseModals}
+        onSave={handleSaveProduct}
+        product={selectedProduct}
+        mode={modalMode}
+      />
+      
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={handleCloseModals}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Produto"
+        description={`Tem certeza que deseja excluir o produto "${productToDelete?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { RoleService, PermissionService } from '../services';
+import { RoleService } from '../services';
 import { 
   CreateRoleDto,
   UpdateRoleDto,
@@ -9,7 +9,6 @@ import {
   CheckPermissionDto,
   createRoleDto,
   updateRoleDto,
-  roleFiltersDto,
   assignRoleDto,
   removeRoleDto,
   checkPermissionDto
@@ -26,7 +25,6 @@ import { logger } from '../../../shared/logger/index';
  */
 export async function roleRoutes(fastify: FastifyInstance) {
   const roleService = new RoleService(fastify.prisma);
-  const permissionService = new PermissionService(fastify.prisma);
 
   // Middleware de autenticação para todas as rotas
   await fastify.register(authMiddleware);

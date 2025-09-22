@@ -32,7 +32,7 @@ export const createPartnerSchema = z.object({
   discount: z.number().min(0, 'Desconto deve ser positivo').max(100, 'Desconto não pode ser maior que 100%').optional(),
   
   // Metadados
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.unknown()).optional()
 });
 
 // Schema de validação para atualização de parceiro
@@ -101,7 +101,7 @@ export interface PartnerResponseDTO {
   paymentTerms?: string;
   salesRepresentative?: string;
   discount?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   contacts?: PartnerContactResponseDTO[];
   companyId: string;
   createdAt: Date;

@@ -103,15 +103,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       updateProfile: async (data: Partial<User>) => {
-        try {
-          const updatedUser = await authService.updateProfile(data)
-          
-          set(state => ({
-            user: { ...state.user, ...updatedUser },
-          }))
-        } catch (error) {
-          throw error
-        }
+        const updatedUser = await authService.updateProfile(data)
+        
+        set(state => ({
+          user: { ...state.user, ...updatedUser },
+        }))
       },
 
       initializeAuth: () => {

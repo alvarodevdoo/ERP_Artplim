@@ -68,10 +68,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: transaction,
         message: 'Transação criada com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -102,10 +103,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
           limit: request.query.limit || 20
         }
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -127,10 +129,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: transaction
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -158,10 +161,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: transaction,
         message: 'Transação atualizada com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -189,10 +193,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: transaction,
         message: 'Transação paga com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -214,10 +219,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Transação excluída com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -245,10 +251,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: category,
         message: 'Categoria criada com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -279,10 +286,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
           limit: request.query.limit || 20
         }
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -304,7 +312,7 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: category
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return reply.code(error.statusCode || 500).send({
         success: false,
         message: error.message || 'Erro interno do servidor'
@@ -335,7 +343,7 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: category,
         message: 'Categoria atualizada com sucesso'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return reply.code(error.statusCode || 500).send({
         success: false,
         message: error.message || 'Erro interno do servidor'
@@ -360,7 +368,7 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Categoria excluída com sucesso'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return reply.code(error.statusCode || 500).send({
         success: false,
         message: error.message || 'Erro interno do servidor'
@@ -391,7 +399,7 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: account,
         message: 'Conta criada com sucesso'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return reply.code(error.statusCode || 500).send({
         success: false,
         message: error.message || 'Erro interno do servidor'
@@ -425,10 +433,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
           limit: request.query.limit || 20
         }
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -450,10 +459,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: account
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -481,10 +491,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: account,
         message: 'Conta atualizada com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -506,10 +517,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Conta excluída com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -537,10 +549,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         data: transfer,
         message: 'Transferência criada com sucesso'
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -571,10 +584,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
           limit: request.query.limit || 20
         }
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -602,10 +616,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: stats
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -638,10 +653,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: cashFlow
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -680,10 +696,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: report
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });
@@ -702,10 +719,11 @@ export async function financialRoutes(fastify: FastifyInstance) {
         success: true,
         data: dashboard
       });
-    } catch (error: any) {
-      return reply.code(error.statusCode || 500).send({
+    } catch (error: unknown) {
+      const err = error as { statusCode?: number; message?: string };
+      return reply.code(err.statusCode || 500).send({
         success: false,
-        message: error.message || 'Erro interno do servidor'
+        message: err.message || 'Erro interno do servidor'
       });
     }
   });

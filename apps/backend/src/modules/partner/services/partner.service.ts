@@ -249,7 +249,8 @@ export class PartnerService {
   /**
    * Valida dados do parceiro
    */
-  private async validatePartnerData(data: CreatePartnerDTO | UpdatePartnerDTO, companyId: string, excludeId?: string): Promise<void> {
+  private async validatePartnerData(data: CreatePartnerDTO | UpdatePartnerDTO, _companyId: string, _excludeId?: string): Promise<void> {
+    // _companyId e _excludeId não são usados atualmente, mas podem ser necessários para validações futuras
     // Validação de nome
     if (data.name && data.name.trim().length < 2) {
       throw new AppError('Nome deve ter pelo menos 2 caracteres', 400);
@@ -330,7 +331,8 @@ export class PartnerService {
   /**
    * Valida se parceiro pode ser excluído
    */
-  private async validatePartnerDeletion(partnerId: string, companyId: string): Promise<void> {
+  private async validatePartnerDeletion(_partnerId: string, _companyId: string): Promise<void> {
+    // _partnerId e _companyId serão usados quando as verificações com outros módulos forem implementadas
     // Verifica se tem pedidos associados
     // TODO: Implementar verificação com módulo de pedidos
     
@@ -343,7 +345,8 @@ export class PartnerService {
   /**
    * Valida se parceiro pode ser bloqueado
    */
-  private async validatePartnerBlocking(partnerId: string, companyId: string): Promise<void> {
+  private async validatePartnerBlocking(_partnerId: string, _companyId: string): Promise<void> {
+    // _partnerId e _companyId serão usados quando as verificações com outros módulos forem implementadas
     // Verifica se tem pedidos em aberto
     // TODO: Implementar verificação com módulo de pedidos
     
@@ -353,7 +356,7 @@ export class PartnerService {
   /**
    * Valida endereço
    */
-  private validateAddress(address: any): void {
+  private validateAddress(address: Record<string, unknown>): void {
     if (address.zipCode && !this.isValidZipCode(address.zipCode)) {
       throw new AppError('CEP inválido', 400);
     }
@@ -426,13 +429,13 @@ export class PartnerService {
     for (let i = 0; i < 12; i++) {
       sum += parseInt(cnpj[i]) * weights1[i];
     }
-    let digit1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    const digit1 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
     sum = 0;
     for (let i = 0; i < 13; i++) {
       sum += parseInt(cnpj[i]) * weights2[i];
     }
-    let digit2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    const digit2 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
     return parseInt(cnpj[12]) === digit1 && parseInt(cnpj[13]) === digit2;
   }

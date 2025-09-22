@@ -11,7 +11,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js'
-import { Bar, Line, Doughnut } from 'react-chartjs-2'
+import { Bar, Doughnut } from 'react-chartjs-2'
 
 // Registrar componentes do Chart.js
 ChartJS.register(

@@ -44,7 +44,7 @@ async function main() {
     },
   })
 
-  const vendorRole = await prisma.role.upsert({
+  await prisma.role.upsert({
     where: { name_companyId: { name: 'Vendedor', companyId: company.id } },
     update: {},
     create: {
@@ -93,7 +93,7 @@ async function main() {
   console.log('✅ Usuário administrador criado')
 
   // Criar parceiros (clientes e fornecedores)
-  const customer = await prisma.partner.upsert({
+  await prisma.partner.upsert({
     where: { document_companyId: { document: '123.456.789-00', companyId: company.id } },
     update: {},
     create: {
@@ -110,7 +110,7 @@ async function main() {
     },
   })
 
-  const supplier = await prisma.partner.upsert({
+  await prisma.partner.upsert({
     where: { document_companyId: { document: '98.765.432/0001-10', companyId: company.id } },
     update: {},
     create: {
@@ -130,7 +130,7 @@ async function main() {
   console.log('✅ Parceiros criados')
 
   // Criar insumos
-  const madeira = await prisma.inputItem.upsert({
+  await prisma.inputItem.upsert({
     where: { id: 'madeira-mdf-15mm' },
     update: {},
     create: {
@@ -149,7 +149,7 @@ async function main() {
   console.log('✅ Insumos criados')
 
   // Criar acabamentos
-  const acabamento = await prisma.finish.upsert({
+  await prisma.finish.upsert({
     where: { id: 'laminado-branco' },
     update: {},
     create: {

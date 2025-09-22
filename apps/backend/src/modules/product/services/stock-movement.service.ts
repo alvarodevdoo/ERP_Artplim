@@ -432,7 +432,7 @@ export class StockMovementService {
       endDate?: Date;
       format?: 'json' | 'csv';
     } = {}
-  ): Promise<any> {
+  ): Promise<{ movements: StockMovementResponseDto[]; summary: { total: number; totalIn: number; totalOut: number; totalAdjustment: number; totalValue: number } } | string> {
     await this.validatePermission(userId, companyId, 'stock', 'read');
 
     const { format = 'json', ...searchFilters } = filters;
@@ -463,7 +463,7 @@ export class StockMovementService {
    */
   private async validateMovementData(
     data: CreateStockMovementDto,
-    companyId: string
+    _companyId: string
   ): Promise<void> {
     // Validar quantidade
     if (data.quantity <= 0) {
@@ -548,10 +548,10 @@ export class StockMovementService {
    * TODO: Implementar validação de permissões quando RoleService estiver disponível
    */
   private async validatePermission(
-    userId: string,
-    companyId: string,
-    resource: string,
-    action: string
+    _userId: string,
+    _companyId: string,
+    _resource: string,
+    _action: string
   ): Promise<void> {
     // TODO: Implementar validação de permissões
     // const hasPermission = await this.roleService.checkPermission(

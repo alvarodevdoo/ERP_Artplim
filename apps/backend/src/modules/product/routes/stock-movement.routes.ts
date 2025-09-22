@@ -10,6 +10,19 @@ import { tenantMiddleware } from '../../../shared/middlewares/tenant';
 import { createValidation } from '../../../shared/middlewares/validation';
 
 /**
+ * Função auxiliar para tratamento de erros
+ */
+function handleError(error: unknown, reply: FastifyReply) {
+  const statusCode = (error as { statusCode?: number }).statusCode || 500;
+  const message = (error as { message?: string }).message || 'Erro interno do servidor';
+  
+  return reply.code(statusCode).send({
+    success: false,
+    message
+  });
+}
+
+/**
  * Rotas para gerenciamento de movimentações de estoque
  */
 export async function stockMovementRoutes(fastify: FastifyInstance) {
@@ -40,11 +53,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           data: movement,
           message: 'Movimentação criada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -95,11 +105,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
             totalPages: result.totalPages
           }
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -127,11 +134,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: movement
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -163,11 +167,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: movements
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -213,11 +214,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: movements
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -253,11 +251,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: stats
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -282,11 +277,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: movements
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -340,11 +332,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           data: movement,
           message: 'Entrada de estoque realizada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -398,11 +387,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           data: movement,
           message: 'Saída de estoque realizada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -457,11 +443,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           data: movement,
           message: 'Ajuste de estoque realizado com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -526,11 +509,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           data: result,
           message: 'Transferência realizada com sucesso'
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -555,11 +535,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: result
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );
@@ -606,11 +583,8 @@ export async function stockMovementRoutes(fastify: FastifyInstance) {
           success: true,
           data: report
         });
-      } catch (error: any) {
-        return reply.code(error.statusCode || 500).send({
-          success: false,
-          message: error.message || 'Erro interno do servidor'
-        });
+      } catch (error: unknown) {
+        return handleError(error, reply);
       }
     }
   );

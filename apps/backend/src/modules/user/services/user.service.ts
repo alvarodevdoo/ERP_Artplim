@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import { User } from '@prisma/client';
 import { UserRepository } from '../repositories';
 import { CompanyRepository } from '../../company/repositories';
 import { logger } from '../../../shared/logger/index';
@@ -408,7 +407,20 @@ export class UserService {
    * @param user Entidade do usuário
    * @returns DTO de resposta do usuário
    */
-  private mapToUserResponse(user: any): UserResponseDto {
+  private mapToUserResponse(user: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    avatar?: string | null;
+    cpf?: string | null;
+    isActive: boolean;
+    lastLogin?: Date | null;
+    company?: { id: string; name: string; document: string } | null;
+    roles?: Array<{ id: string; name: string }> | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }): UserResponseDto {
     return {
       id: user.id,
       name: user.name,

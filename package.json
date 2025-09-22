@@ -23,14 +23,19 @@
     "docker:logs": "docker-compose logs -f"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.4.0",
+    "@commitlint/config-conventional": "^18.4.0",
+    "@eslint/js": "^9.36.0",
     "@types/node": "^20.10.0",
-    "typescript": "^5.3.0",
     "eslint": "^8.55.0",
-    "prettier": "^3.1.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "globals": "^16.4.0",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
-    "@commitlint/cli": "^18.4.0",
-    "@commitlint/config-conventional": "^18.4.0"
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "^8.44.0"
   },
   "engines": {
     "node": ">=20.0.0",

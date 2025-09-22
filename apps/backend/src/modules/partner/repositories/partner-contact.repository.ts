@@ -1,4 +1,4 @@
-import { PrismaClient, PartnerContact, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { 
   CreatePartnerContactDTO, 
   UpdatePartnerContactDTO, 
@@ -74,7 +74,7 @@ export class PartnerContactRepository {
       });
 
       return contact ? this.formatContactResponse(contact) : null;
-    } catch (error) {
+    } catch (_error) {
       throw new AppError('Erro ao buscar contato', 500);
     }
   }
@@ -248,9 +248,9 @@ export class PartnerContactRepository {
       });
 
       return this.formatContactResponse(contact);
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
+    } catch (_error) {
+      if (_error instanceof AppError) {
+        throw _error;
       }
       throw new AppError('Erro ao definir contato primário', 500);
     }
@@ -282,9 +282,9 @@ export class PartnerContactRepository {
       });
 
       return contact ? this.formatContactResponse(contact) : null;
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
+    } catch (_error) {
+      if (_error instanceof AppError) {
+        throw _error;
       }
       throw new AppError('Erro ao buscar contato primário', 500);
     }
@@ -304,7 +304,7 @@ export class PartnerContactRepository {
       });
 
       return !!contact;
-    } catch (error) {
+    } catch (_error) {
       throw new AppError('Erro ao verificar email', 500);
     }
   }

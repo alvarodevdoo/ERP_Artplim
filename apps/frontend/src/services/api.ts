@@ -39,7 +39,7 @@ api.interceptors.response.use(
     return response
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as any
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean }
     
     // Handle 401 errors (unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -97,15 +97,15 @@ api.interceptors.response.use(
 // Helper function to extract error messages
 function getErrorMessage(error: AxiosError): string {
   if (error.response?.data) {
-    const data = error.response.data as any
+    const data = error.response.data as { errors?: Array<{ message: string }>; message?: string } | string
     
     // Handle validation errors
-    if (data.errors && Array.isArray(data.errors)) {
-      return data.errors.map((err: any) => err.message).join(', ')
+    if (typeof data === 'object' && data.errors && Array.isArray(data.errors)) {
+      return data.errors.map((err) => err.message).join(', ')
     }
     
     // Handle single error message
-    if (data.message) {
+    if (typeof data === 'object' && data.message) {
       return data.message
     }
     

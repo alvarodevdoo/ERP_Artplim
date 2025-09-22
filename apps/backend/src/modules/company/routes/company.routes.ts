@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { CompanyService } from '../services';
 import { CreateCompanyDto, UpdateCompanyDto, CompanyFiltersDto, createCompanyDto, updateCompanyDto } from '../dtos';
-import { authMiddleware, requireRole, requirePermission } from '../../../shared/middlewares/auth';
+import { authMiddleware, requirePermission } from '../../../shared/middlewares/auth';
 import { tenantMiddleware } from '../../../shared/middlewares/tenant';
 import { createValidation } from '../../../shared/middlewares/validation';
 import { logger } from '../../../shared/logger/index';

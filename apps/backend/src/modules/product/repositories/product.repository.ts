@@ -87,7 +87,7 @@ export class ProductRepository {
       });
 
       return product ? this.formatProductResponse(product) : null;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produto', 500);
     }
   }
@@ -179,7 +179,7 @@ export class ProductRepository {
         limit,
         totalPages: Math.ceil(total / limit)
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produtos', 500);
     }
   }
@@ -189,7 +189,8 @@ export class ProductRepository {
    */
   async update(id: string, data: UpdateProductDto, companyId: string): Promise<ProductResponseDto> {
     try {
-      const { variations, dimensions, ...productData } = data;
+      const { variations: _variations, dimensions, ...productData } = data;
+      // _variations não é usado neste método, apenas extraído para não ser incluído em productData
 
       const product = await this.prisma.product.update({
         where: {
@@ -315,7 +316,7 @@ export class ProductRepository {
       });
 
       return !!product;
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao verificar SKU', 500);
     }
   }
@@ -352,7 +353,7 @@ export class ProductRepository {
       });
 
       return products.map(product => this.formatProductResponse(product));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produtos por categoria', 500);
     }
   }
@@ -392,7 +393,7 @@ export class ProductRepository {
       });
 
       return products.map(product => this.formatProductResponse(product));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produtos com estoque baixo', 500);
     }
   }
@@ -430,7 +431,7 @@ export class ProductRepository {
       });
 
       return products.map(product => this.formatProductResponse(product));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produtos sem estoque', 500);
     }
   }
@@ -593,7 +594,7 @@ export class ProductRepository {
         })),
         recentlyAdded: recentlyAdded.map(product => this.formatProductResponse(product))
       };
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao obter estatísticas de produtos', 500);
     }
   }
@@ -627,7 +628,7 @@ export class ProductRepository {
   /**
    * Buscar produtos para relatório
    */
-  async findForReport(filters: any, companyId: string): Promise<ProductResponseDto[]> {
+  async findForReport(filters: Record<string, unknown>, companyId: string): Promise<ProductResponseDto[]> {
     try {
       const products = await this.prisma.product.findMany({
         where: {
@@ -655,7 +656,7 @@ export class ProductRepository {
       });
 
       return products.map(product => this.formatProductResponse(product));
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao buscar produtos para relatório', 500);
     }
   }
@@ -663,29 +664,67 @@ export class ProductRepository {
   /**
    * Formatar resposta do produto
    */
-  private formatProductResponse(product: any): ProductResponseDto {
+  private formatProductResponse(product: unknown): ProductResponseDto {
+    const prod = product as {
+      id: string;
+      name: string;
+      description?: string;
+      sku: string;
+      barcode?: string;
+      categoryId?: string;
+      category?: { id: string; name: string; description?: string };
+      unitOfMeasure: string;
+      costPrice: number;
+      salePrice: number;
+      minStock: number;
+      maxStock?: number;
+      currentStock: number;
+      location?: string;
+      weight?: number;
+      dimensions?: string;
+      images?: string[];
+      isActive: boolean;
+      isService: boolean;
+      hasVariations: boolean;
+      variations?: Array<{
+        id: string;
+        name: string;
+        sku: string;
+        costPrice: number;
+        salePrice: number;
+        stock: number;
+        attributes?: string;
+      }>;
+      tags?: string[];
+      notes?: string;
+      companyId: string;
+      createdAt: Date;
+      updatedAt: Date;
+      deletedAt?: Date;
+    };
+    
     return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      sku: product.sku,
-      barcode: product.barcode,
-      categoryId: product.categoryId,
-      category: product.category,
-      unitOfMeasure: product.unitOfMeasure,
-      costPrice: product.costPrice,
-      salePrice: product.salePrice,
-      minStock: product.minStock,
-      maxStock: product.maxStock,
-      currentStock: product.currentStock,
-      location: product.location,
-      weight: product.weight,
-      dimensions: product.dimensions ? JSON.parse(product.dimensions) : null,
-      images: product.images || [],
-      isActive: product.isActive,
-      isService: product.isService,
-      hasVariations: product.hasVariations,
-      variations: product.variations?.map((variation: any) => ({
+      id: prod.id,
+      name: prod.name,
+      description: prod.description,
+      sku: prod.sku,
+      barcode: prod.barcode,
+      categoryId: prod.categoryId,
+      category: prod.category,
+      unitOfMeasure: prod.unitOfMeasure,
+      costPrice: prod.costPrice,
+      salePrice: prod.salePrice,
+      minStock: prod.minStock,
+      maxStock: prod.maxStock,
+      currentStock: prod.currentStock,
+      location: prod.location,
+      weight: prod.weight,
+      dimensions: prod.dimensions ? JSON.parse(prod.dimensions) : null,
+      images: prod.images || [],
+      isActive: prod.isActive,
+      isService: prod.isService,
+      hasVariations: prod.hasVariations,
+      variations: prod.variations?.map((variation) => ({
         id: variation.id,
         name: variation.name,
         sku: variation.sku,
@@ -694,12 +733,12 @@ export class ProductRepository {
         stock: variation.stock,
         attributes: variation.attributes ? JSON.parse(variation.attributes) : {}
       })) || [],
-      tags: product.tags || [],
-      notes: product.notes,
-      companyId: product.companyId,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-      deletedAt: product.deletedAt
+      tags: prod.tags || [],
+      notes: prod.notes,
+      companyId: prod.companyId,
+      createdAt: prod.createdAt,
+      updatedAt: prod.updatedAt,
+      deletedAt: prod.deletedAt
     };
   }
 }

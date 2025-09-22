@@ -95,7 +95,7 @@ export class EmployeeService {
       });
 
       return this.formatEmployeeResponse(employee);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao criar funcionário', 500);
     }
   }
@@ -220,7 +220,7 @@ export class EmployeeService {
     try {
       const employee = await this.employeeRepository.update(id, data, companyId);
       return this.formatEmployeeResponse(employee);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao atualizar funcionário', 500);
     }
   }
@@ -242,14 +242,14 @@ export class EmployeeService {
     }
 
     // Verificar se funcionário pode ser deletado
-    const canDelete = await this.canDeleteEmployee(id, companyId);
+    const canDelete = await this.canDeleteEmployee();
     if (!canDelete.canDelete) {
       throw new AppError(canDelete.reason!, 400);
     }
 
     try {
       await this.employeeRepository.delete(id, companyId);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao deletar funcionário', 500);
     }
   }
@@ -276,7 +276,7 @@ export class EmployeeService {
       }
 
       return this.formatEmployeeResponse(employee);
-    } catch (error) {
+    } catch {
       throw new AppError('Erro ao restaurar funcionário', 500);
     }
   }
@@ -470,14 +470,9 @@ export class EmployeeService {
 
   /**
    * Verifica se funcionário pode ser deletado
-   * @param employeeId ID do funcionário
-   * @param companyId ID da empresa
    * @returns Resultado da verificação
    */
-  private async canDeleteEmployee(
-    employeeId: string,
-    companyId: string
-  ): Promise<{ canDelete: boolean; reason?: string }> {
+  private async canDeleteEmployee(): Promise<{ canDelete: boolean; reason?: string }> {
     // Por enquanto, permite deletar funcionários
     // TODO: Implementar verificações quando os módulos de ponto e folha forem criados
     return { canDelete: true };
@@ -510,7 +505,7 @@ export class EmployeeService {
    * @param employee Dados do funcionário
    * @returns Funcionário formatado
    */
-  private formatEmployeeResponse(employee: any): EmployeeResponseDto {
+  private formatEmployeeResponse(employee: Record<string, unknown>): EmployeeResponseDto {
     return {
       id: employee.id,
       name: employee.name,

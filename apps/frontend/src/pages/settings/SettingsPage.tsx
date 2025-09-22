@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, User, Building, Shield, Bell, Palette, Database, Key, Globe, Mail } from 'lucide-react'
+import { Save, User, Building, Shield, Bell, Database, Key } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
@@ -131,7 +131,7 @@ export function SettingsPage() {
       // Simular salvamento
       await new Promise(resolve => setTimeout(resolve, 1500))
       toast.success('Configurações salvas com sucesso!')
-    } catch (error) {
+    } catch {
       toast.error('Erro ao salvar configurações')
     } finally {
       setSaving(false)
@@ -380,7 +380,7 @@ export function SettingsPage() {
                     </label>
                     <select
                       value={systemSettings.theme}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, theme: e.target.value as any }))}
+                      onChange={(e) => setSystemSettings(prev => ({ ...prev, theme: e.target.value as 'light' | 'dark' | 'auto' }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="light">Claro</option>
@@ -395,7 +395,7 @@ export function SettingsPage() {
                     </label>
                     <select
                       value={systemSettings.language}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, language: e.target.value as any }))}
+                      onChange={(e) => setSystemSettings(prev => ({ ...prev, language: e.target.value as 'pt-BR' | 'en-US' }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="pt-BR">Português (Brasil)</option>
@@ -424,7 +424,7 @@ export function SettingsPage() {
                     </label>
                     <select
                       value={systemSettings.dateFormat}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, dateFormat: e.target.value as any }))}
+                      onChange={(e) => setSystemSettings(prev => ({ ...prev, dateFormat: e.target.value as 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD' }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -439,7 +439,7 @@ export function SettingsPage() {
                     </label>
                     <select
                       value={systemSettings.currency}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, currency: e.target.value as any }))}
+                      onChange={(e) => setSystemSettings(prev => ({ ...prev, currency: e.target.value as 'BRL' | 'USD' | 'EUR' }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="BRL">Real (R$)</option>
