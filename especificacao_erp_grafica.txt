@@ -1,0 +1,345 @@
+﻿Crie um sistema ERP web completo para uma gráfica, pronto para desenvolvimento e deploy, seguindo estritamente as especificações fornecidas nesta conversa. O sistema deve ser entregue com código (backend e frontend), configuração de infraestrutura (Docker, Compose), migrations/seed para PostgreSQL, testes automatizados e pipelines CI/CD. A arquitetura técnica deve seguir SOLID, package-by-feature, Node.js + TypeScript no backend, React + TypeScript no frontend, PostgreSQL, Docker, Redis, BullMQ (fila), MinIO (S3 compatível), e Socket.IO para recursos em tempo real. O sistema deve implementar todos os requisitos funcionais, regras de negócio, relatórios, backup/restore e RBAC detalhados nas conversas anteriores.
+nome do sistema: "ArtPlim ERP"
+---
+
+Arquitetura e organização do repositório
+- Monorepo com pnpm workspaces (ou yarn workspaces) organizado em dois pacotes principais: /packages/backend e /packages/frontend; root contém /docker, /infrastructure, /docs.
+- Cada feature no backend e frontend segue package-by-feature: por exemplo /packages/backend/src/features/orders/{controller,service,repository,dtos,models,tests}.
+- Padrões: TypeScript estrito, ESLint, Prettier, Husky (git hooks), commitlint.
+- Aplicar princípios SOLID: controllers finos, services com uma responsabilidade, repositórios acoplados a interfaces (Dependency Inversion), factories e dependency injection leve (Inversify ou tsyringe).
+- Multi-tenant: todas as entidades principais incluem company_id; middleware valida e isola dados por tenant; projetar esquema com separação lógica por company_id e considerar estratégias opcionais (schema-per-tenant ou database-per-tenant) documentadas para escalabilidade e migração.
+
+---
+
+Backend — especificação detalhada
+
+Stack e libs principais
+- Node.js 20+, TypeScript.
+- Framework HTTP: Fastify (preferencial) ou Express com performance otimizada.
+- ORM: Prisma (preferencial) com migrations ou TypeORM se preferir; incluir schema Prisma pronto.
+- Validação: Zod para DTOs.
+- Autenticação: JWT (access + refresh), refresh token guardado em DB/Redis; autenticação por cookie/http-only em web.
+- RBAC: tabela roles/permissions; middleware para verificar permissão por recurso+action.
+- Real-time: Socket.IO com namespaces por company_id e auth middleware.
+- Cache e fila: Redis + BullMQ.
+- Storage: MinIO (S3 compat) para arquivos e snapshots.
+- Geração de PDF: Puppeteer ou Playwright em worker via fila.
+- Logging: pino (JSON) + healthcheck endpoint.
+- Tests: Jest + Supertest (integration), unit tests para services, Playwright/Cypress para e2e.
+
+Estrutura de pastas (backend)
+- /packages/backend/
+  - src/
+    - app.ts (Fastify init, plugins, error handler)
+    - server.ts (start script)
+    - config/
+    - infra/
+      - prisma/
+      - redis/
+      - queue/
+      - storage/
+    - modules/ (package-by-feature)
+      - auth/
+      - users/
+      - roles/
+      - employees/
+      - timeclock/
+      - products/
+      - inputs/
+      - finishes/
+      - quotes/
+      - orders/
+      - stock/
+      - finance/
+      - partners/
+      - reports/
+      - backups/
+      - notifications/
+    - shared/
+      - dto/
+      - errors/
+      - utils/
+      - middleware/
+      - di/
+  - prisma/
+    - schema.prisma
+    - migrations/
+  - tests/
+  - Dockerfile
+  - package.json
+  - tsconfig.json
+
+Modelo Prisma (exemplo resumido; entregar completo)
+Fornecer schema Prisma completo com relações e índices. Exemplo mínimo (trecho):
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  users     User[]
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @relation(fields: [roleId], references: [id])
+  roleId       String
+  company      Company  @relation(fields: [companyId], references: [id])
+  companyId    String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  permissions Json
+  company     Company? @relation(fields: [companyId], references: [id])
+  companyId   String?
+  createdAt   DateTime @default(now())
+}
+
+model Product { /* ... */ }
+model Variant { /* ... */ }
+model InputItem { /* ... */ }
+model Finish { /* ... */ }
+model Partner { /* ... */ }
+model Quote { /* ... */ }
+model Order { /* ... */ }
+model StockMovement { /* ... */ }
+model FinancialEntry { /* ... */ }
+model BackupSnapshot { /* ... */ }
+
+Entregar schema completo com campos e constraints conforme entidades listadas no prompt anterior, incluindo company_id nos modelos relevantes para isolamento de dados.
+
+Endpoints: lista completa e contratos (resumido aqui — entregar OpenAPI completo)
+- Auth: POST /api/v1/auth/login, POST /api/v1/auth/refresh, POST /api/v1/auth/recover, POST /api/v1/auth/reset.
+- Users/Roles/Permissions: CRUD endpoints com RBAC enforcement.
+- Employees & Ponto: CRUD employees, POST /employees/:id/ponto (registro), GET /employees/:id/ponto?from=&to= (relatório).
+- Products & Variants: CRUD /api/v1/products, /api/v1/products/:id/variants.
+- Inputs: POST /api/v1/inputs/entry, GET /api/v1/inputs/stock, POST /api/v1/inputs/loss.
+- Finishes: CRUD /api/v1/finishes, POST /api/v1/finishes/:id/associate-product.
+- Quotes/Orders: POST /api/v1/quotes, POST /api/v1/quotes/:id/convert, CRUD /api/v1/orders, PATCH /api/v1/orders/:id/status.
+- Stock movements: GET /api/v1/stock/movements, POST /api/v1/stock/adjust.
+- Finance: GET /api/v1/finance/cashflow, POST /api/v1/finance/entries, GET /api/v1/finance/partners/:id/payments.
+- Reports: GET /api/v1/reports/profitability, GET /api/v1/reports/partner-payments.
+- Backups: POST /api/v1/backups/create, GET /api/v1/backups, POST /api/v1/backups/:id/restore.
+- Notifications (Socket fallback): GET /api/v1/notifications.
+
+Cada endpoint deve ter DTOs Zod, exemplos de request/response no OpenAPI, e testes de integração que validem regras críticas (cálculos, RBAC, comportamento de transações).
+
+Regras de negócio implementadas no backend (exemplos detalhados)
+- Custo unitário insumo: cost_unit = purchase_cost_total / quantity_received. Seed com exemplo R/400fls => R,50. Testes unit validam arredondamento e edge cases (0 quantity, negative values).
+- Ao criar OS: reservar insumos (criar StockMovement tipo reserve) e ao avançar etapa de produção consumir (StockMovement type out). Conflitos de concorrência resolvidos por transação DB + SELECT FOR UPDATE via ORM raw query.
+- Perda de material: POST /inputs/loss gera StockMovement tipo loss e cria FinancialEntry do tipo expense referenciando order_id e centro de custo.
+- Acabamentos terceirizados: se finish.outsourced = true, ao registrar OS gerar provisionamento (FinancialEntry type provision) com partner_id; pagamentos agrupados por partner e ciclo.
+- Lucro OS: revenue − (sum insumos usados + acabamentos + labor_hours_cost + despesas diretas) → calcular em service com testes unitários.
+
+Socket.IO (backend)
+- Namespaces: /company/:companyId.
+- Autenticação: handshake com access token; validar company_id match.
+- Eventos emitidos pelo servidor:
+  - order:created (payload orderSummary)
+  - order:updated (orderId, status, updatedFields)
+  - stock:updated (inputId, newQty, thresholdAlert)
+  - partner:paymentDue (partnerId, totalDue, cycle)
+- Rooms por orderId para assinaturas finas.
+- Emitir eventos ao criar/atualizar orders, ao consumir estoque e ao gerar provisões. Tests mock Socket server.
+
+---
+
+Frontend — especificação detalhada
+
+Stack e libs principais
+- React 18+ com TypeScript.
+- Vite ou Next.js (preferir Next.js se SSR/SEO for relevante; caso contrário Vite com SPA + SSR fallback para geração de PDFs).
+- State: React Query (tanstack) para data fetching/caching; Context/Provider para Auth + Theme.
+- UI: Component library custom com design tokens exportáveis; Chakra UI / Radix primitives optional para acessibilidade.
+- Router: React Router v6 (se Vite) ou Next.js routes.
+- Formulários: React Hook Form + Zod resolver.
+- Charts: Recharts / Chart.js para dashboards.
+- Socket.IO client configurado com reconnection e namespace per company.
+- File upload: presigned URLs para MinIO/S3.
+
+Estrutura de pastas (frontend)
+- /packages/frontend/
+  - src/
+    - app/
+      - App.tsx
+      - routes.tsx
+      - index.css (tokens)
+    - pages/
+      - auth/
+      - dashboard/
+      - employees/
+      - products/
+      - inputs/
+      - finishes/
+      - quotes/
+      - orders/
+      - stock/
+      - finance/
+      - partners/
+      - reports/
+      - config/
+      - backups/
+    - components/
+      - ui/ (buttons, inputs, cards, table)
+      - layout/ (sidebar, topbar, theme-panel)
+      - forms/
+      - sockets/
+    - services/ (api clients, auth, socket)
+    - hooks/ (useAuth, useTheme, useSocket)
+    - types/
+    - tests/ (jest + react-testing-library)
+  - Dockerfile
+  - package.json
+  - tsconfig.json
+
+UX/Interações técnicas
+- Code splitting: lazy() + Suspense for routes; prefetch data for important routes via React Query prefetch on hover.
+- Server-side pagination for tables: query params page/limit/sort/filter; frontend UI shows server-side pagination component.
+- Skeleton loaders and optimistic updates for common actions (like status change of OS).
+- Socket usage pages:
+  - Orders Kanban: subscribe to /company/:id and room order:<orderId>; updates alter card position and show toast.
+  - Stock page: live updates of stock quantities and low-stock alerts.
+  - Notifications: toast list with badge count in topbar.
+- Theme provider: allow admin to set primary/secondary colors, background, logo; values saved via /api/v1/config/theme and applied via CSS variables.
+
+Páginas críticas (detalhar campos e comportamento)
+Entregar roteiro de telas com todos os campos, validações e exemplos de payloads. Exemplos:
+- Criar Orçamento (multi-step):
+  1. Selecionar cliente/dados.
+  2. Adicionar itens: produto -> variante -> quantidade -> selecione acabamentos (cada acabamento exibe custo predefinido e toggle terceirizado/interno); calcular custo item com breakdown (insumos, acabamento, mão de obra).
+  3. Margens e descontos: definir margem % ou preço final; sistema mostra margem calculada e alerta se abaixo da margem mínima.
+  4. Revisão e envio: gerar PDF (fila worker) e salvar rascunho.
+- Order Detail:
+  - Timeline de etapas com tempos estimados, anexos, logs de usuário, anexar arquivos (print, artes).
+  - Ao mudar etapa para “Em produção” consumir stock (via API); mostrar modal de consumo (quantidade por insumo com possibilidade de ajustar perda antes de confirmar).
+
+---
+
+Infraestrutura, docker e scripts
+
+Docker Compose (arquivo exemplo docker-compose.yml)
+Fornecer docker-compose.yml com serviços:
+- postgres:13/15
+- redis
+- minio
+- backend (imagem node)
+- frontend (imagem)
+- queue-dashboard (Arena/Bull Board)
+- adminer/pgadmin (opcional)
+
+Exemplo resumido:
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: erp
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+  minio:
+    image: minio/minio
+    command: server /data
+    environment: MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+    ports: ["9000:9000"]
+  backend:
+    build: ./packages/backend
+    env_file: .env.backend
+    depends_on: [postgres, redis, minio]
+  frontend:
+    build: ./packages/frontend
+    env_file: .env.frontend
+    depends_on: [backend]
+volumes:
+  db-data:
+
+Incluir Dockerfiles multistage para backend e frontend otimizados.
+
+Backup script (exemplo)
+- Cron job (node script) que executa pg_dump, comprime, faz upload para MinIO e registra metadata em tabela BackupSnapshot. Endpoint /api/v1/backups lista snapshots e permite restore (restore implementado via job que para serviços necessários, restaura dump e reindexa).
+
+CI/CD (GitHub Actions) — pipeline YAML resumido
+- jobs: lint, test, build, docker-image, push-to-registry, deploy-staging.
+- Steps: checkout, setup node, pnpm install, build, run tests, build docker images, push to registry, deploy via kubectl/ssh. Incluir secrets references.
+
+---
+
+Observability, segurança e qualidade
+- Healthcheck endpoints /health (readiness/liveness).
+- Rate limiting global e por IP, helmet, CORS configurado por company whitelist.
+- Encryption of secrets (use Vault/sealed secrets guidance).
+- Logs estruturados JSON (pino) e rotacionamento.
+- Metrics: expose /metrics para Prometheus (optional).
+- Test matrix: unit (services + calculations), integration (DB + endpoints), e2e flows (Playwright) cobrindo: login → criar orçamento → converter OS → consumir estoque → registrar perda → fechar OS → gerar relatório → criar backup → restaurar snapshot.
+
+---
+
+Segurança da aplicação e conformidades
+- Senhas hashed com bcrypt/argon2.
+- Tokens JWT com short expiration + refresh tokens armazenados e rotacionados.
+- Proteção CSRF, validação e sanitização em todos inputs.
+- Política de backups e retenção configurável no UI.
+- GDPR/LPDP readiness: endpoints para exportar/deletar dados de um tenant/usuário.
+
+---
+
+Multi-tenant details and strategies
+- Data isolation: incluir company_id em todas entidades críticas; aplicar middleware que injeta company_id ao criar/consultar registros.
+- Row-level security: considerar uso de PostgreSQL Row Level Security (RLS) para isolar dados no banco por tenant.
+- Schema strategies: documentar trade-offs entre shared schema (company_id), schema-per-tenant and database-per-tenant; implementar shared-schema initially with clear migration path to schema-per-tenant if required.
+- Tenant onboarding: APIs para criar company, default roles, default settings (theme, currency, fiscal settings), sample data seeds.
+- Permissions scoping: roles and permissions tied to company; admin role scoped per company, super-admin global with cross-tenant view if needed.
+- Billing & quotas: placeholders para limitar recursos por tenant (ex.: number of users, storage used) e hooks para integração com provedores de pagamento.
+- Backup & restore per tenant: allow snapshot export per company and restore into staging company; ensure sensitive operations require confirmation and proper authorization.
+- Monitoring and metrics multi-tenant: tag metrics/logs by company_id and provide filters in dashboards.
+
+---
+
+Testes, coverage e QA
+- Cobertura mínima 70% para regras de cálculo e serviços críticos.
+- Testes unitários para: cost calculations, stock reservation/consumption, loss handling, provision creation, profit aggregation.
+- Testes de integração para endpoints financeiros e de OS que envolvem transações.
+- E2E para fluxo principal com dados seed: criar orçamento → aprovar → converter → consumir → fechar → gerar relatório.
+- Incluir scripts: yarn test:unit, yarn test:integration, yarn test:e2e.
+
+---
+
+Documentação e entregáveis finais
+- Repositório pronto com:
+  - Código backend + frontend completo e lintado.
+  - Prisma schema + migrations + seeds (exemplos com R/400fls, parceiros com ciclos semanal/mensal).
+  - Dockerfiles + docker-compose.yml.
+  - Script de backup/restore e integração com MinIO.
+  - OpenAPI (Swagger) completo e atualizado.
+  - README com passo-a-passo: setup local, configurar .env, rodar migrations, seeds, iniciar compose, executar testes, build images, deploy.
+  - GitHub Actions pipeline configurado.
+  - Arquivo ER diagram e documentação das entidades.
+  - Checklist de aceitação e playbook de deploy/rollback.
+
+---
+
+Critérios de aceitação e testes de aceitação do cliente
+- Instalar e rodar local via docker-compose e acessar UI (login) e API (Swagger).
+- Executar fluxo completo de teste: criar produto com variante, cadastrar insumo com custo R/400fls, criar orçamento com acabamento terceirizado, converter em OS, consumir estoque, lançar perda, gerar relatório mensal de lucratividade que reflita custos e pagamentos a parceiros.
+- Testar backup automático e restaurar snapshot em ambiente de staging.
+- Testar sockets: abrir dois navegadores logados na mesma company, mudar status da OS e observar updates em tempo real.
+- Validação RBAC: usuário sem permissão não consegue acessar endpoints protegidos; administrador pode configurar permissões.
+
+---
+
+Entrega final
+- Entregar repositório Git com branches: main (prod), develop (staging), feature/* conforme backlog.
+- Fornecer commit history coerente com práticas de Git (commits atômicos + PRs com descrição).
+- Disponibilizar documentação técnica suficiente para que equipe interna ou contratada faça manutenção, extensões e deploy em cloud.
+
+Se desejar, eu converto este documento em uma especificação técnica em formato OpenAPI + Prisma schema completo + docker-compose.yml + GitHub Actions YAML + esqueleto de código (scaffolding) pronto para começar a implementação. Qual dos artefatos deseja que eu gere primeiro: Prisma schema completo, docker-compose com envs, OpenAPI skeleton, ou scaffold do backend (controllers/services/repositories) para a feature Orders?

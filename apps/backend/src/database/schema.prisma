@@ -1,0 +1,442 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo Company (Empresa)
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  tradeName String?
+  cnpj      String   @unique
+  email     String
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  description String?
+  website   String?
+  logo      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  users            User[]
+  employees        Employee[]
+  roles            Role[]
+  products         Product[]
+  variants         Variant[]
+  inputItems       InputItem[]
+  finishes         Finish[]
+  partners         Partner[]
+  quotes           Quote[]
+  quoteItems       QuoteItem[]
+  orders           Order[]
+  orderItems       OrderItem[]
+  stockMovements   StockMovement[]
+  financialEntries FinancialEntry[]
+
+  @@map("companies")
+}
+
+// Modelo User (Usuário)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  isActive  Boolean  @default(true)
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  company                   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee                  Employee?
+  createdQuotes             Quote[]           @relation("QuoteCreator")
+  createdOrders             Order[]           @relation("OrderCreator")
+  createdStockMovements     StockMovement[]   @relation("StockMovementCreator")
+  createdFinancialEntries   FinancialEntry[]  @relation("FinancialEntryCreator")
+
+  @@map("users")
+}
+
+// Modelo Role (Cargo/Função)
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  permissions Json     @default("[]")
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees Employee[]
+
+  @@unique([name, companyId])
+  @@map("roles")
+}
+
+// Modelo Employee (Funcionário)
+model Employee {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  roleId         String
+  employeeNumber String
+  department     String?
+  position       String?
+  salary         Decimal?
+  hireDate       DateTime  @default(now())
+  isActive       Boolean   @default(true)
+  companyId      String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role    @relation(fields: [roleId], references: [id])
+
+  @@unique([employeeNumber, companyId])
+  @@map("employees")
+}
+
+// Modelo Product (Produto)
+model Product {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  sku          String
+  category     String?
+  unit         String
+  costPrice    Decimal
+  salePrice    Decimal
+  minStock     Int     @default(0)
+  currentStock Int     @default(0)
+  isActive     Boolean @default(true)
+  companyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  variants       Variant[]
+  quoteItems     QuoteItem[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+
+  @@unique([sku, companyId])
+  @@map("products")
+}
+
+// Modelo Variant (Variante do Produto)
+model Variant {
+  id           String @id @default(cuid())
+  productId    String
+  name         String
+  sku          String
+  attributes   Json   @default("{}")
+  costPrice    Decimal
+  salePrice    Decimal
+  currentStock Int    @default(0)
+  isActive     Boolean @default(true)
+  companyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quoteItems     QuoteItem[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+
+  @@unique([sku, companyId])
+  @@map("variants")
+}
+
+// Modelo InputItem (Insumo)
+model InputItem {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  unit         String
+  costPrice    Decimal
+  supplier     String?
+  minStock     Int     @default(0)
+  currentStock Int     @default(0)
+  isActive     Boolean @default(true)
+  companyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stockMovements StockMovement[]
+
+  @@map("input_items")
+}
+
+// Modelo Finish (Acabamento)
+model Finish {
+  id             String  @id @default(cuid())
+  name           String
+  description    String?
+  type           String
+  color          String?
+  texture        String?
+  additionalCost Decimal @default(0)
+  isActive       Boolean @default(true)
+  companyId      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("finishes")
+}
+
+// Modelo Partner (Parceiro - Cliente/Fornecedor)
+model Partner {
+  id            String      @id @default(cuid())
+  name          String
+  type          PartnerType
+  document      String
+  email         String?
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  contactPerson String?
+  notes         String?
+  isActive      Boolean     @default(true)
+  companyId     String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relacionamentos
+  company          Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  quotes           Quote[]
+  orders           Order[]
+  financialEntries FinancialEntry[]
+
+  @@unique([document, companyId])
+  @@map("partners")
+}
+
+// Modelo Quote (Orçamento)
+model Quote {
+  id          String      @id @default(cuid())
+  partnerId   String
+  userId      String
+  number      String
+  status      QuoteStatus @default(DRAFT)
+  description String?
+  validUntil  DateTime
+  subtotal    Decimal
+  discount    Decimal     @default(0)
+  total       Decimal
+  notes       String?
+  companyId   String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relacionamentos
+  company Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  partner Partner     @relation(fields: [partnerId], references: [id])
+  user    User        @relation("QuoteCreator", fields: [userId], references: [id])
+  items   QuoteItem[]
+  orders  Order[]
+
+  @@unique([number, companyId])
+  @@map("quotes")
+}
+
+// Modelo QuoteItem (Item do Orçamento)
+model QuoteItem {
+  id          String  @id @default(cuid())
+  quoteId     String
+  productId   String?
+  variantId   String?
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  discount    Decimal @default(0)
+  total       Decimal
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  quote   Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  variant Variant? @relation(fields: [variantId], references: [id])
+
+  @@map("quote_items")
+}
+
+// Modelo Order (Ordem de Serviço)
+model Order {
+  id           String      @id @default(cuid())
+  partnerId    String
+  userId       String
+  quoteId      String?
+  number       String
+  status       OrderStatus @default(PENDING)
+  description  String?
+  deliveryDate DateTime?
+  subtotal     Decimal
+  discount     Decimal     @default(0)
+  total        Decimal
+  notes        String?
+  companyId    String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relacionamentos
+  company          Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  partner          Partner          @relation(fields: [partnerId], references: [id])
+  user             User             @relation("OrderCreator", fields: [userId], references: [id])
+  quote            Quote?           @relation(fields: [quoteId], references: [id])
+  items            OrderItem[]
+  financialEntries FinancialEntry[]
+
+  @@unique([number, companyId])
+  @@map("orders")
+}
+
+// Modelo OrderItem (Item da Ordem de Serviço)
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String?
+  variantId   String?
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  discount    Decimal @default(0)
+  total       Decimal
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  variant Variant? @relation(fields: [variantId], references: [id])
+
+  @@map("order_items")
+}
+
+// Modelo StockMovement (Movimentação de Estoque)
+model StockMovement {
+  id          String            @id @default(cuid())
+  productId   String?
+  variantId   String?
+  inputItemId String?
+  userId      String
+  type        StockMovementType
+  quantity    Decimal
+  unitCost    Decimal?
+  totalCost   Decimal?
+  reason      String
+  reference   String?
+  notes       String?
+  companyId   String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relacionamentos
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  product   Product?   @relation(fields: [productId], references: [id])
+  variant   Variant?   @relation(fields: [variantId], references: [id])
+  inputItem InputItem? @relation(fields: [inputItemId], references: [id])
+  user      User       @relation("StockMovementCreator", fields: [userId], references: [id])
+
+  @@map("stock_movements")
+}
+
+// Modelo FinancialEntry (Lançamento Financeiro)
+model FinancialEntry {
+  id          String                @id @default(cuid())
+  type        FinancialEntryType
+  status      FinancialEntryStatus  @default(PENDING)
+  category    String
+  description String
+  amount      Decimal
+  dueDate     DateTime
+  paidDate    DateTime?
+  partnerId   String?
+  orderId     String?
+  userId      String
+  reference   String?
+  notes       String?
+  companyId   String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  // Relacionamentos
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  partner Partner? @relation(fields: [partnerId], references: [id])
+  order   Order?   @relation(fields: [orderId], references: [id])
+  user    User     @relation("FinancialEntryCreator", fields: [userId], references: [id])
+
+  @@map("financial_entries")
+}
+
+// Enums
+enum PartnerType {
+  CUSTOMER
+  SUPPLIER
+  BOTH
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PRODUCTION
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum StockMovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+enum FinancialEntryType {
+  INCOME
+  EXPENSE
+}
+
+enum FinancialEntryStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
