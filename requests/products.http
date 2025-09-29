@@ -1,0 +1,55 @@
+# requests/products.http
+
+@baseUrl = http://localhost:3001/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWZ4NmZvZmowMDAxMTJ1bGQxODJrNGhtIiwiY29tcGFueUlkIjoiY21meDZmb2ZnMDAwMDEydWxzMjJocGZvZSIsImlhdCI6MTc1ODY4NDMxMCwiZXhwIjoxNzU5Mjg5MTEwfQ.cmV_mYVwmQvbqgPcqyFl3GVR9HvU5D2yxXbFqGMv03g
+
+### (AUTH) Fazer login para obter o token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@artplim.com.br",
+  "password": "admin123"
+}
+
+### ===================================================
+###                  PRODUTOS (AUTENTICADO)
+### ===================================================
+
+
+### (GET) Obter todos os produtos
+GET {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+
+### (POST) Criar um novo produto
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Produto de Teste",
+  "description": "Descrição do produto de teste.",
+  "price": 19.99,
+  "stock": 100
+}
+
+### (GET) Obter um produto por ID
+# @prompt id Insira o ID do produto
+GET {{baseUrl}}/products/{{id}}
+Authorization: Bearer {{authToken}}
+
+
+### (PUT) Atualizar um produto
+# @prompt id_update Insira o ID do produto para atualizar
+PUT {{baseUrl}}/products/{{id_update}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "price": 25.50
+}
+
+### (DELETE) Deletar um produto
+# @prompt id_delete Insira o ID do produto para deletar
+DELETE {{baseUrl}}/products/{{id_delete}}
+Authorization: Bearer {{authToken}}

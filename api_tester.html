@@ -1,0 +1,421 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #212529; }
+        .container { max-width: 960px; margin: 2rem auto; padding: 2rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; margin-bottom: 1rem; color: #495057; }
+        .endpoint { border: 1px solid #e9ecef; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #fff; }
+        .endpoint h3 { margin-top: 0; color: #007bff; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        input[type='text'], input[type='password'], input[type='email'], textarea { width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem; }
+        button { background-color: #007bff; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem; transition: background-color 0.2s; }
+        button:hover { background-color: #0056b3; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+        pre { background-color: #e9ecef; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #dee2e6; }
+        #auth-status { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; font-weight: 500; }
+        .logged-out { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .logged-in { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .token-display { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
+        .token-display input { flex-grow: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>API Tester</h1>
+
+    <div id="auth-status" class="logged-out">Not logged in</div>
+
+    <!-- AUTHENTICATION -->
+    <div class="endpoint">
+        <h3>Authentication</h3>
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="admin@artplim.com.br">
+        <label for="password">Password:</label>
+        <input type="password" id="password" value="admin123">
+        <button type="button" id="login-btn">Login</button>
+        <button type="button" id="logout-btn" class="secondary" style="display: none;">Logout</button>
+        <div id="token-container" style="display: none;">
+            <label for="access-token-field">Access Token:</label>
+            <div class="token-display">
+                <input type="text" id="access-token-field" readonly>
+                <button type="button" id="copy-token-btn">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOKEN INPUT FOR OTHER ROUTES -->
+    <div class="endpoint">
+        <h3>API Token</h3>
+        <label for="api-token-input">Paste Token Here to Test Routes:</label>
+        <input type="text" id="api-token-input" placeholder="Paste your token here">
+    </div>
+
+
+    <!-- PRODUCTS -->
+    <h2>Products</h2>
+    <div class="endpoint">
+        <h3>List All Products</h3>
+        <button type="button" id="list-products-btn">GET /products</button>
+    </div>
+
+    <!-- USERS -->
+    <h2>Users</h2>
+    <div class="endpoint">
+        <h3>List All Users</h3>
+        <button type="button" id="list-users-btn">GET /users</button>
+    </div>
+
+    <div class="endpoint">
+        <h3>Create User</h3>
+        <label for="user-name">Name:</label>
+        <input type="text" id="user-name" placeholder="New User Name">
+        <label for="user-email">Email:</label>
+        <input type="email" id="user-email" placeholder="new.user@example.com">
+        <label for="user-password">Password:</label>
+        <input type="password" id="user-password" placeholder="min 8 characters">
+        <label for="user-role-ids">Role IDs:</label>
+        <select id="user-role-ids" multiple style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; margin-bottom: 1rem;">
+            <!-- Options will be loaded here by JavaScript -->
+        </select>
+        <button type="button" id="create-user-btn">POST /users</button>
+    </div>
+
+    <div class="endpoint">
+        <h3>Get User by ID</h3>
+        <label for="get-user-id">User ID:</label>
+        <input type="text" id="get-user-id" placeholder="Enter user ID">
+        <button type="button" id="get-user-btn">GET /users/{id}</button>
+    </div>
+
+    <div class="endpoint">
+        <h3>Update User</h3>
+        <label for="update-user-id">User ID to Update:</label>
+        <input type="text" id="update-user-id" placeholder="Enter user ID">
+        <label for="update-user-name">New Name (optional):</label>
+        <input type="text" id="update-user-name" placeholder="New name">
+        <label for="update-user-email">New Email (optional):</label>
+        <input type="email" id="update-user-email" placeholder="New email">
+        <button type="button" id="update-user-btn">PUT /users/{id}</button>
+    </div>
+
+    <div class="endpoint">
+        <h3>Delete User</h3>
+        <label for="delete-user-id">User ID to Delete:</label>
+        <input type="text" id="delete-user-id" placeholder="Enter user ID">
+        <button type="button" id="delete-user-btn">DELETE /users/{id}</button>
+    </div>
+
+    <!-- RESPONSE -->
+    <h2>API Response</h2>
+    <pre id="response-area">Awaiting request...</pre>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:3001/api';
+    let companyId = null;
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const listProductsBtn = document.getElementById('list-products-btn');
+    const listUsersBtn = document.getElementById('list-users-btn');
+    const createUserBtn = document.getElementById('create-user-btn');
+    const getUserBtn = document.getElementById('get-user-btn');
+    const updateUserBtn = document.getElementById('update-user-btn');
+    const deleteUserBtn = document.getElementById('delete-user-btn');
+    const responseArea = document.getElementById('response-area');
+    const authStatus = document.getElementById('auth-status');
+    const tokenContainer = document.getElementById('token-container');
+    const accessTokenField = document.getElementById('access-token-field');
+    const copyTokenBtn = document.getElementById('copy-token-btn');
+    const apiTokenInput = document.getElementById('api-token-input');
+
+
+    // Helper to get the token to use for a request
+    const getApiToken = () => {
+        const storedToken = localStorage.getItem('accessToken');
+        if (storedToken) {
+            return `Bearer ${storedToken}`;
+        }
+        let token = apiTokenInput.value.trim();
+        if (token) {
+            if (!token.toLowerCase().startsWith('bearer ')) {
+                token = `Bearer ${token}`;
+            }
+            return token;
+        }
+        return null;
+    }
+
+    // Helper to display responses
+    const showResponse = (data) => {
+        responseArea.textContent = JSON.stringify(data, null, 2);
+    };
+
+    // Helper to update auth status UI
+    const updateAuthStatus = () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+            try {
+                const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                companyId = payload.companyId;
+                authStatus.textContent = `Logged In! Company ID: ${companyId}. Token will expire at ${new Date(payload.exp * 1000).toUTCString()}`;
+                authStatus.className = 'logged-in';
+                accessTokenField.value = accessToken;
+                tokenContainer.style.display = 'block';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                loadRolesIntoSelect(); // Load roles after successful login
+            } catch (e) {
+                console.error("Failed to parse token", e);
+                localStorage.removeItem('accessToken');
+                updateAuthStatus(); // Re-run to show logged out state
+            }
+        } else {
+            authStatus.textContent = 'Not logged in';
+            authStatus.className = 'logged-out';
+            companyId = null;
+            accessTokenField.value = '';
+            tokenContainer.style.display = 'none';
+            loginBtn.style.display = 'inline-block';
+            logoutBtn.style.display = 'none';
+            const userRoleIdsSelect = document.getElementById('user-role-ids');
+            if (userRoleIdsSelect) userRoleIdsSelect.innerHTML = ''; // Clear roles if logged out
+        }
+    };
+
+    // Copy token to clipboard
+    copyTokenBtn.addEventListener('click', () => {
+        accessTokenField.select();
+        document.execCommand('copy');
+        copyTokenBtn.textContent = 'Copied!';
+        setTimeout(() => { copyTokenBtn.textContent = 'Copy'; }, 2000);
+    });
+
+
+    // Login
+    loginBtn.addEventListener('click', async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailInput.value, password: passwordInput.value })
+            });
+            const data = await res.json();
+            if (res.ok && data.tokens.accessToken) {
+                localStorage.setItem('accessToken', data.tokens.accessToken);
+                updateAuthStatus();
+            } else {
+                localStorage.removeItem('accessToken');
+            }
+            showResponse(data);
+        } catch (error) {
+            showResponse({ error: error.message });
+            localStorage.removeItem('accessToken');
+            updateAuthStatus();
+        }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('accessToken');
+        apiTokenInput.value = '';
+        updateAuthStatus();
+        showResponse({ message: "Logged out" });
+    });
+
+    // List Products
+    listProductsBtn.addEventListener('click', async () => {
+        const token = getApiToken();
+        if (!token) {
+            alert('Please log in or provide a token.');
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE_URL}/products`, {
+                headers: { 'Authorization': token }
+            });
+            const data = await res.json();
+            showResponse(data);
+        } catch (error) {
+            showResponse({ error: error.message });
+        }
+    });
+
+    // List Users
+    listUsersBtn.addEventListener('click', async () => {
+        const token = getApiToken();
+        if (!token) {
+            alert('Please log in or provide a token.');
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE_URL}/users`, {
+                headers: { 'Authorization': token }
+            });
+            const data = await res.json();
+            showResponse(data);
+        } catch (error) {
+            showResponse({ error: error.message });
+        }
+    });
+
+    // Create User
+    createUserBtn.addEventListener('click', async () => {
+        const token = getApiToken();
+        if (!token) {
+            alert('Please log in or provide a token.');
+            return;
+        }
+
+        const userNameInput = document.getElementById('user-name');
+        const userEmailInput = document.getElementById('user-email');
+        const userPasswordInput = document.getElementById('user-password');
+        const userRoleIdsSelect = document.getElementById('user-role-ids');
+
+        const selectedRoleIds = Array.from(userRoleIdsSelect.selectedOptions).map(option => option.value);
+
+        if (selectedRoleIds.length === 0) {
+            alert('Please select at least one role.');
+            return;
+        }
+
+        const newUser = {
+            name: userNameInput.value,
+            email: userEmailInput.value,
+            password: userPasswordInput.value,
+            companyId: companyId, // This might be null if the page was reloaded
+            roleIds: selectedRoleIds
+        };
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify(newUser)
+            });
+            const data = await res.json();
+            showResponse(data);
+        } catch (error) {
+            showResponse({ error: error.message });
+        }
+    });
+
+    // Function to load roles into the select element
+    const loadRolesIntoSelect = async () => {
+        const token = getApiToken();
+        if (!token) {
+            const userRoleIdsSelect = document.getElementById('user-role-ids');
+            if (userRoleIdsSelect) userRoleIdsSelect.innerHTML = ''; // Clear roles if logged out
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/roles`, {
+                headers: { 'Authorization': token }
+            });
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                const userRoleIdsSelect = document.getElementById('user-role-ids');
+                userRoleIdsSelect.innerHTML = ''; // Clear existing options
+
+                result.data.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.textContent = role.name;
+                    userRoleIdsSelect.appendChild(option);
+                });
+            } else {
+                console.error('Failed to load roles:', result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+        }
+    };
+
+    // Initial auth status check on page load
+    updateAuthStatus();
+    loadRolesIntoSelect(); // Load roles on page load
+
+    // Update User
+    updateUserBtn.addEventListener('click', async () => {
+        const token = getApiToken();
+        if (!token) { alert('Please log in or provide a token.'); return; }
+        const userId = document.getElementById('update-user-id').value;
+        if (!userId) { alert('Please enter a User ID to update.'); return; }
+
+        const newName = document.getElementById('update-user-name').value;
+        const newEmail = document.getElementById('update-user-email').value;
+
+        const updateData = {};
+        if (newName) updateData.name = newName;
+        if (newEmail) updateData.email = newEmail;
+
+        if (Object.keys(updateData).length === 0) {
+            alert('Please provide at least one field to update.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify(updateData)
+            });
+            const data = await res.json();
+            showResponse(data);
+        } catch (error) {
+            showResponse({ error: error.message });
+        }
+    });
+
+    // Delete User
+    deleteUserBtn.addEventListener('click', async () => {
+        const token = getApiToken();
+        if (!token) { alert('Please log in or provide a token.'); return; }
+        const userId = document.getElementById('delete-user-id').value;
+        if (!userId) { alert('Please enter a User ID to delete.'); return; }
+
+        if (!confirm(`Are you sure you want to delete user ${userId}?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token }
+            });
+            // DELETE might not return a body, so handle that case
+            if (res.status === 204 || res.status === 200) {
+                 const data = await res.json().catch(() => ({ message: 'User deleted successfully' }));
+                 showResponse(data);
+            } else {
+                 const data = await res.json();
+                 showResponse(data);
+            }
+        } catch (error) {
+            showResponse({ error: error.message });
+        }
+    });
+
+    // Initial auth status check on page load
+    updateAuthStatus();
+</script>
+
+</body>
+</html>

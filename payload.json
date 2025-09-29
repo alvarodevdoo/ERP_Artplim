@@ -1,0 +1,8 @@
+{
+  "name": "Produto de Teste Definitivo",
+  "sku": "SKU-FINAL-001",
+  "category": "Categoria Teste",
+  "unitOfMeasure": "UN",
+  "costPrice": 100,
+  "salePrice": 150
+}
